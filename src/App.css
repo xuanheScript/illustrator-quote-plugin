@@ -1,0 +1,203 @@
+/* CEP 插件面板样式 */
+.plugin-container {
+  width: 100%;
+  height: 100vh;
+  padding: 16px;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  background-color: #f5f5f5;
+  color: #333;
+  overflow-y: auto;
+}
+
+.plugin-header {
+  text-align: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #ddd;
+}
+
+.plugin-header h2 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.plugin-header p {
+  margin: 0;
+  font-size: 13px;
+  color: #666;
+}
+
+.plugin-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #555;
+}
+
+.material-select,
+.price-input {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 13px;
+  background-color: white;
+  transition: border-color 0.2s;
+}
+
+.material-select:focus,
+.price-input:focus {
+  outline: none;
+  border-color: #007acc;
+  box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.2);
+}
+
+.material-select {
+  cursor: pointer;
+}
+
+.price-input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.apply-button,
+.export-button {
+  padding: 12px 16px;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.apply-button {
+  background-color: #007acc;
+  color: white;
+}
+
+.apply-button:hover:not(:disabled) {
+  background-color: #005a9e;
+}
+
+.export-button {
+  background-color: #28a745;
+  color: white;
+}
+
+.export-button:hover:not(:disabled) {
+  background-color: #218838;
+}
+
+.apply-button:disabled,
+.export-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.message {
+  padding: 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  margin-top: 8px;
+  word-wrap: break-word;
+}
+
+.message.success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.message.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.instructions {
+  margin-top: 24px;
+  padding: 16px;
+  background-color: #e9ecef;
+  border-radius: 4px;
+  border-left: 4px solid #007acc;
+}
+
+.instructions h3 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.instructions ol {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.instructions li {
+  font-size: 12px;
+  color: #555;
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+/* 响应式设计 */
+@media (max-width: 320px) {
+  .plugin-container {
+    padding: 12px;
+  }
+  
+  .plugin-header h2 {
+    font-size: 16px;
+  }
+  
+  .form-group label,
+  .material-select,
+  .price-input,
+  .apply-button,
+  .export-button {
+    font-size: 12px;
+  }
+}
+
+/* 滚动条样式 */
+.plugin-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.plugin-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.plugin-container::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+.plugin-container::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}

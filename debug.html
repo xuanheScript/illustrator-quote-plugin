@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Illustrator Quote Plugin - Debug</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 20px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+        background-color: #f5f5f5;
+      }
+      .debug-info {
+        background: #e3f2fd;
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+        border-left: 4px solid #2196f3;
+      }
+      .plugin-container {
+        max-width: 320px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="debug-info">
+      <h2>🔧 调试模式</h2>
+      <p>这是插件的浏览器调试版本。在实际的 CEP 环境中，CSInterface 将可用。</p>
+      <p><strong>注意：</strong>在浏览器中，ExtendScript 调用将被模拟。</p>
+    </div>
+
+    <div class="plugin-container">
+      <div id="root">
+        <div style="display: flex; justify-content: center; align-items: center; height: 400px; font-size: 14px; color: #666;">
+          正在加载插件...
+        </div>
+      </div>
+    </div>
+
+    <!-- 模拟 CSInterface -->
+    <script>
+      // 模拟 CSInterface 用于浏览器调试
+      window.CSInterface = function() {
+        this.hostEnvironment = {
+          appName: "ILST",
+          appVersion: "25.0.0"
+        };
+      };
+
+      window.CSInterface.prototype.getHostEnvironment = function() {
+        return JSON.stringify(this.hostEnvironment);
+      };
+
+      window.CSInterface.prototype.evalScript = function(script, callback) {
+        console.log("🔧 模拟 ExtendScript 调用:", script);
+        
+        // 模拟不同的响应
+        setTimeout(function() {
+          if (callback) {
+            if (script.includes('applyMaterial')) {
+              callback(JSON.stringify({
+                success: true,
+                message: "模拟：成功应用材质到 1 个对象",
+                data: [{
+                  name: "测试对象",
+                  material: "亚克力",
+                  area: "2.500",
+                  unitPrice: 200,
+                  totalPrice: "500.00"
+                }]
+              }));
+            } else if (script.includes('exportQuote')) {
+              callback(JSON.stringify({
+                success: true,
+                message: "模拟：报价单已导出到桌面: 报价单_20241225_1430.csv",
+                data: {
+                  itemCount: 1,
+                  totalAmount: "500.00",
+                  filePath: "/Users/Desktop/报价单_20241225_1430.csv"
+                }
+              }));
+            } else {
+              callback("模拟脚本执行完成");
+            }
+          }
+        }, 500);
+      };
+
+      console.log("🔧 CSInterface 模拟器已加载");
+    </script>
+
+    <!-- 加载构建后的插件 -->
+    <script src="./dist/assets/index.js"></script>
+  </body>
+</html> 

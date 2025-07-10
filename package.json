@@ -1,0 +1,50 @@
+{
+  "name": "illustrator-quote-plugin",
+  "version": "1.0.0",
+  "description": "Adobe Illustrator CEP plugin for material quoting and pricing",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "build:cep": "yarn build && yarn prepare-cep",
+    "prepare-cep": "cp -r CSXS jsx lib dist/ && cp index-cep.html dist/index.html",
+    "copy-files": "cp -r CSXS jsx lib dist/ && cp index-cep.html dist/index.html",
+    "diagnose": "node diagnose.js",
+    "debug": "python3 -m http.server 8080",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "package": "yarn build:cep && yarn create-zxp",
+    "create-zxp": "echo 'ZXP packaging requires Adobe Extension Builder or ZXPSignCmd'",
+    "install-debug": "yarn build:cep && yarn copy-to-extensions",
+    "copy-to-extensions": "echo 'Copy dist folder to CEP extensions directory'"
+  },
+  "dependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.30.1",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@vitejs/plugin-react": "^4.6.0",
+    "eslint": "^9.30.1",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "globals": "^16.3.0",
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.35.1",
+    "vite": "^7.0.4"
+  },
+  "keywords": [
+    "adobe",
+    "illustrator",
+    "cep",
+    "plugin",
+    "material",
+    "quote",
+    "pricing"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}

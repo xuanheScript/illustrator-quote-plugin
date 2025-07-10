@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Illustrator Quote Plugin</title>
+    <!-- CEP通信库 -->
+    <script src="./lib/CSInterface.js"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+        background-color: #f5f5f5;
+      }
+      #root {
+        width: 100%;
+        height: 100vh;
+        overflow: hidden;
+      }
+      /* 确保插件在CEP环境中正确显示 */
+      html, body {
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <!-- 加载指示器 -->
+      <div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-size: 14px; color: #666;">
+        正在加载插件...
+      </div>
+    </div>
+    
+    <!-- 引入构建后的JavaScript，使用传统方式而不是ES6模块 -->
+    <script>
+      // 确保CSInterface可用
+      if (typeof CSInterface === 'undefined') {
+        console.error('CSInterface not loaded');
+      } else {
+        console.log('CSInterface loaded successfully');
+      }
+    </script>
+    
+    <!-- 由于CEP可能不支持ES6模块，我们需要特殊处理 -->
+    <script src="./assets/index.js"></script>
+  </body>
+</html> 
