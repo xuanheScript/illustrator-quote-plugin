@@ -1,67 +1,165 @@
-# 🔧 Illustrator Quote Plugin 故障排除指南
+# 🔧 Illustrator Quote Plugin 故障排除指南 (CEP 12)
+
+## 🆕 CEP 12 专用故障排除
+
+### 版本兼容性检查
+
+**首先确认您的环境：**
+- ✅ **Adobe Illustrator 2025** (版本 29.0) 或更高版本
+- ✅ **CEP 12** 运行时支持
+- ✅ **Node.js 17.7.1** 或更高版本（开发环境）
+- ✅ **操作系统**：Windows 10/11 或 macOS 10.15+
+
+### CEP 12 调试端口
+
+- **新调试端口**：8088 (CEP 12 默认)
+- **远程调试地址**：http://localhost:8088
+- **旧版本端口**：8080 (CEP 10/11)
 
 ## 白屏问题解决方案
 
 如果插件在 Illustrator 中显示白屏，请按照以下步骤进行排查：
 
-### 第一步：运行诊断工具
+### 第一步：检查 CEP 12 兼容性
+
+#### 1. 确认 Illustrator 版本
+```bash
+# 检查 Illustrator 版本
+# 菜单栏 → 帮助 → 关于 Illustrator
+# 确保版本为 29.0 (2025) 或更高
+```
+
+#### 2. 确认 CEP 12 调试模式
+**macOS:**
+```bash
+defaults write com.adobe.CSXS.12 PlayerDebugMode 1
+```
+
+**Windows:**
+```
+HKEY_CURRENT_USER\Software\Adobe\CSXS.12
+名称: PlayerDebugMode
+类型: REG_SZ
+值: 1
+```
+
+#### 3. 检查 manifest.xml 配置
+确保以下配置正确：
+```xml
+<ExtensionManifest Version="12.0">
+  <RequiredRuntime Name="CSXS" Version="12.0" />
+  <Host Name="ILST" Version="[29.0,99.9]" />
+</ExtensionManifest>
+```
+
+### 第二步：运行诊断工具
 
 ```bash
 npm run diagnose
 ```
 
 诊断工具会检查：
-- ✅ 所有必要文件是否存在
-- ✅ manifest.xml 配置是否正确
-- ✅ HTML 文件引用是否正确
-- ✅ CSS 样式是否正确内联
-- ✅ CSInterface 库是否正常
+- ✅ CEP 12 配置文件
+- ✅ Chromium 99 兼容性
+- ✅ Node.js 17.7.1+ 支持
+- ✅ manifest.xml 版本配置
+- ✅ CSInterface.js v12.0.0
+- ✅ 调试端口配置
 
-### 第二步：检查浏览器控制台
+### 第三步：检查浏览器控制台 (CEP 12 增强)
 
 1. 在插件面板中右键点击
 2. 选择"检查元素"或按 F12
-3. 查看 Console 选项卡中的错误信息
+3. 访问远程调试：http://localhost:8088
+4. 查看 Console 选项卡中的错误信息
 
-**常见错误及解决方案：**
+**CEP 12 特定错误及解决方案：**
 
-#### `CSInterface is not defined`
-- **原因**：CSInterface 库未正确加载
-- **解决**：检查 `dist/lib/CSInterface.js` 是否存在
-- **修复**：`npm run build:cep`
+#### `CSInterface v12.0.0 is not defined`
+- **原因**：CEP 12 CSInterface 库未正确加载
+- **解决**：检查 `dist/lib/CSInterface.js` 是否为 v12.0.0 版本
+- **修复**：重新下载 CEP 12 版本的 CSInterface.js
 
-#### `Failed to load resource: ./assets/index.js`
-- **原因**：JavaScript 文件路径错误或文件不存在
-- **解决**：检查 `dist/assets/index.js` 是否存在
-- **修复**：`npm run build:cep`
+#### `Chromium 99 API not supported`
+- **原因**：使用了 Chromium 99 不支持的 API
+- **解决**：检查代码中是否使用了弃用的 Web API
+- **修复**：更新到 Chromium 99 兼容的 API
 
-#### `Uncaught TypeError: Cannot read property 'createElement' of null`
-- **原因**：React 渲染失败，可能是 DOM 元素不存在
-- **解决**：检查 HTML 中是否有 `<div id="root"></div>`
-- **修复**：确保 HTML 文件正确
+#### `Node.js 17.7.1 module error`
+- **原因**：Node.js 版本不兼容
+- **解决**：确保开发环境使用 Node.js 17.7.1+
+- **修复**：`nvm use 17.7.1` 或更新 Node.js
 
-#### `Script error`
-- **原因**：JavaScript 执行错误
-- **解决**：启用详细错误信息，检查具体错误
+#### `Metal API rendering error (macOS)`
+- **原因**：macOS 上 OpenGL 已弃用，需要 Metal API
+- **解决**：确保 macOS 10.15+ 并支持 Metal
+- **修复**：更新 macOS 或使用支持 Metal 的硬件
 
-### 第三步：浏览器调试
+### 第四步：检查 CEP 12 环境
 
-在浏览器中测试插件 UI：
+#### 确认 CEP 12 调试模式已启用
 
+**macOS:**
 ```bash
-# 启动本地服务器
-npm run debug
-
-# 或者手动启动
-python3 -m http.server 8080
+defaults write com.adobe.CSXS.12 PlayerDebugMode 1
 ```
 
-然后访问 `http://localhost:8080/debug.html`
+**Windows:**
+在注册表中添加：
+```
+HKEY_CURRENT_USER\Software\Adobe\CSXS.12
+名称: PlayerDebugMode
+类型: REG_SZ
+值: 1
+```
 
-如果浏览器中也显示白屏，说明是 React 组件问题：
-- 检查 JavaScript 控制台错误
-- 确认 React 组件正确渲染
-- 检查 CSS 样式是否正确应用
+#### 检查 Illustrator 版本兼容性
+
+- **Illustrator 2025 (29.0)** 使用 CEP 12 ✅
+- **Illustrator 2024 (28.0)** 使用 CEP 11 ❌
+- **Illustrator 2021-2023** 使用 CEP 10 ❌
+- 确保 manifest.xml 中的版本匹配
+
+#### CEP 版本对照表
+
+| CEP 版本 | Illustrator 版本 | 调试设置 | 支持状态 |
+|---------|-----------------|---------|---------|
+| CEP 12  | 2025 (29.0+)    | CSXS.12 | ✅ 当前版本 |
+| CEP 11  | 2024 (28.0)     | CSXS.11 | ❌ 不兼容 |
+| CEP 10  | 2021-2023       | CSXS.10 | ❌ 不兼容 |
+
+### 第五步：CEP 12 特定问题
+
+#### 1. V8 引擎 9.9.115 兼容性
+- **问题**：某些 JavaScript 语法可能需要更新
+- **解决**：使用现代 JavaScript 特性
+- **示例**：
+  ```javascript
+  // 旧版本
+  var self = this;
+  
+  // CEP 12 推荐
+  const self = this;
+  ```
+
+#### 2. Chromium 99 安全策略
+- **问题**：更严格的安全策略
+- **解决**：在 manifest.xml 中添加必要的 CEF 参数
+- **配置**：
+  ```xml
+  <CEFCommandLine>
+    <Parameter>--disable-web-security</Parameter>
+    <Parameter>--enable-nodejs</Parameter>
+  </CEFCommandLine>
+  ```
+
+#### 3. Node.js 17.7.1 模块兼容性
+- **问题**：某些 npm 包可能不兼容
+- **解决**：使用 CEP 12 兼容的包版本
+- **检查**：
+  ```bash
+  npm ls --depth=0
+  ```
 
 ## 功能问题解决方案
 
@@ -174,144 +272,138 @@ ls -lt ~/Desktop/报价单_*.csv | head -5
 cat ~/Desktop/报价单_*.csv
 ```
 
-### 第四步：检查 CEP 环境
+## CEP 12 增强调试功能
 
-#### 确认调试模式已启用
+### 1. 远程调试
+- **地址**：http://localhost:8088
+- **功能**：完整的 Chrome DevTools 支持
+- **新特性**：
+  - 更好的性能分析
+  - 现代 JavaScript 调试
+  - 网络请求监控
+  - 内存使用分析
 
-**macOS:**
-```bash
-defaults write com.adobe.CSXS.10 PlayerDebugMode 1
+### 2. 日志增强
+CEP 12 提供更详细的日志信息：
+```javascript
+// 系统信息
+console.log('CEP Version:', window.__adobe_cep__.getCEPVersion());
+console.log('Chromium Version:', window.__adobe_cep__.getChromiumVersion());
+console.log('Node.js Version:', process.version);
+
+// 性能监控
+console.time('MaterialApplication');
+// ... 应用材质代码 ...
+console.timeEnd('MaterialApplication');
 ```
 
-**Windows:**
-在注册表中添加：
-```
-HKEY_CURRENT_USER\Software\Adobe\CSXS.10
-名称: PlayerDebugMode
-类型: REG_SZ
-值: 1
-```
-
-#### 检查 Illustrator 版本兼容性
-
-- Illustrator 2021 使用 CEP 10
-- Illustrator 2020 使用 CEP 9
-- 确保 manifest.xml 中的版本匹配
-
-#### 检查插件安装位置
-
-**macOS:**
-```
-~/Library/Application Support/Adobe/CEP/extensions/com.illustrator.quote.panel/
+### 3. 错误追踪
+```javascript
+// 捕获 CEP 12 特定错误
+window.addEventListener('error', (event) => {
+  console.error('CEP 12 Error:', {
+    message: event.message,
+    filename: event.filename,
+    lineno: event.lineno,
+    colno: event.colno,
+    stack: event.error?.stack
+  });
+});
 ```
 
-**Windows:**
+## 升级迁移问题
+
+### 从 CEP 10 升级到 CEP 12
+
+#### 1. 版本不兼容
+- **问题**：插件在 Illustrator 2025 中不显示
+- **原因**：manifest.xml 版本配置错误
+- **解决**：更新版本配置
+  ```xml
+  <!-- 旧版本 -->
+  <ExtensionManifest Version="10.0">
+    <RequiredRuntime Name="CSXS" Version="10.0" />
+    <Host Name="ILST" Version="[25.0,99.9]" />
+  
+  <!-- 新版本 -->
+  <ExtensionManifest Version="12.0">
+    <RequiredRuntime Name="CSXS" Version="12.0" />
+    <Host Name="ILST" Version="[29.0,99.9]" />
+  ```
+
+#### 2. CSInterface 库版本
+- **问题**：CSInterface 方法调用失败
+- **原因**：使用了旧版本的 CSInterface.js
+- **解决**：更新到 v12.0.0 版本
+
+#### 3. 调试端口变更
+- **问题**：无法访问调试界面
+- **原因**：端口从 8080 变更为 8088
+- **解决**：使用新的调试地址 http://localhost:8088
+
+### 常见迁移错误
+
+#### 错误1：`Extension not loaded`
 ```
-%APPDATA%\Adobe\CEP\extensions\com.illustrator.quote.panel\
+Error: Extension not loaded. Check manifest.xml version.
 ```
+**解决**：确保 manifest.xml 版本为 12.0
 
-### 第五步：重新构建和安装
-
-如果上述步骤都没有解决问题，尝试完全重新构建：
-
-```bash
-# 清理和重新构建
-rm -rf dist node_modules
-npm install
-npm run build:cep
-
-# 重新安装到 Illustrator
-# 删除旧的插件文件夹
-# 复制新的 dist 文件夹到扩展目录
-# 重命名为 com.illustrator.quote.panel
+#### 错误2：`Host version mismatch`
 ```
+Error: Host version [28.0] not supported. Required: [29.0,99.9]
+```
+**解决**：升级到 Illustrator 2025 或调整版本范围
 
-### 第六步：检查网络选项卡
+#### 错误3：`CSInterface API deprecated`
+```
+Warning: CSInterface method 'xxx' is deprecated in CEP 12
+```
+**解决**：使用新的 API 方法
 
-在浏览器开发者工具的 Network 选项卡中：
-- 确认所有资源都正确加载（状态码 200）
-- 检查是否有 404 错误
-- 确认文件路径正确
+## 性能优化 (CEP 12)
 
-### 常见解决方案总结
+### 1. Chromium 99 优化
+- 使用现代 CSS 特性
+- 利用 GPU 加速
+- 优化 JavaScript 性能
 
-| 问题 | 解决方案 | 日志位置 |
-|------|----------|----------|
-| 白屏 | 检查控制台错误，运行诊断工具 | 浏览器控制台 |
-| CSInterface 未定义 | 确保 CSInterface.js 存在并正确引用 | 浏览器控制台 |
-| 应用材质无反应 | 检查文档和选择状态，使用调试测试 | 浏览器控制台 |
-| 导出报价无反应 | 检查已应用材质的对象，确认文件权限 | 浏览器控制台 + 桌面文件 |
-| 找不到生成的文件 | 检查桌面，确认文件权限 | `~/Desktop/报价单_*.csv` |
-| React 渲染失败 | 在浏览器中测试，检查组件代码 | 浏览器控制台 |
-| 插件不显示 | 检查调试模式，确认安装位置 | CEP 日志 |
-| 版本不兼容 | 更新 manifest.xml 中的版本设置 | manifest.xml |
-
-### 调试命令汇总
-
-```bash
-# 诊断插件状态
-npm run diagnose
-
-# 构建插件
-npm run build:cep
-
-# 浏览器调试
-npm run debug
-
-# 查看构建输出
-ls -la dist/
-
-# 检查 JavaScript 是否包含 CSS
-grep -n "plugin-container" dist/assets/index.js
-
-# 检查 HTML 文件内容
-cat dist/index.html
-
-# 查看生成的报价文件
-ls -lt ~/Desktop/报价单_*.csv
-
-# 检查文件内容
-cat ~/Desktop/报价单_*.csv
+### 2. 内存管理
+```javascript
+// 避免内存泄漏
+window.addEventListener('beforeunload', () => {
+  // 清理资源
+  cleanup();
+});
 ```
 
-### 逐步调试流程
+### 3. 渲染优化
+```css
+/* 使用 GPU 加速 */
+.accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+}
+```
 
-1. **基础检查**
-   ```bash
-   npm run diagnose
-   ```
+## 日志分析指南
 
-2. **功能测试**
-   - 点击"调试测试"按钮
-   - 查看调试信息显示
+### CEP 12 成功日志
+```
+CSInterface v12.0.0 initialized
+Chromium 99 engine ready
+Node.js 17.7.1 available
+Metal API (macOS) or DirectX (Windows) rendering enabled
+Extension loaded successfully
+```
 
-3. **应用材质测试**
-   - 在 Illustrator 中创建一个矩形
-   - 选中矩形
-   - 点击"应用材质"
-   - 查看是否生成标注文本
-
-4. **导出测试**
-   - 确保已应用材质
-   - 点击"导出报价"
-   - 检查桌面是否生成 CSV 文件
-
-5. **日志分析**
-   - 打开浏览器控制台
-   - 查看详细的执行日志
-   - 分析错误信息
-
-### 联系支持
-
-如果问题仍然存在，请提供以下信息：
-1. 诊断工具的输出结果
-2. 浏览器控制台的错误信息
-3. 调试测试的结果
-4. Illustrator 版本信息
-5. 操作系统版本
-6. 插件安装位置和文件列表
-7. 具体的操作步骤和期望结果
+### 错误日志分析
+```
+[CEP 12] Error: Extension manifest version mismatch
+[CEP 12] Warning: Deprecated API usage detected
+[CEP 12] Info: Remote debugging available at localhost:8088
+```
 
 ---
 
-**提示**：大多数功能问题都是由于前置条件不满足（如未选中对象、未打开文档）或权限问题导致的。通过调试测试按钮和浏览器控制台通常能找到具体原因。 
+**重要提示**：CEP 12 专为 Adobe Illustrator 2025+ 设计。如需支持旧版本，请使用相应的 CEP 版本。 

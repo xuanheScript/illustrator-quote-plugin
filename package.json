@@ -1,14 +1,14 @@
 {
   "name": "illustrator-quote-plugin",
-  "version": "1.0.0",
-  "description": "Adobe Illustrator CEP plugin for material quoting and pricing",
+  "version": "2.0.0",
+  "description": "Adobe Illustrator CEP 12 plugin for material quoting and pricing - supports Illustrator 2025+",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "build:cep": "yarn build && yarn prepare-cep",
-    "prepare-cep": "cp -r CSXS jsx lib dist/ && cp index-cep.html dist/index.html",
+    "prepare-cep": "cp -r CSXS jsx lib dist/ && cp index-cep.html dist/index.html && cp .debug dist/",
     "copy-files": "cp -r CSXS jsx lib dist/ && cp index-cep.html dist/index.html",
     "diagnose": "node diagnose.js",
     "debug": "python3 -m http.server 8080",
@@ -40,11 +40,29 @@
     "adobe",
     "illustrator",
     "cep",
+    "cep12",
     "plugin",
+    "extension",
     "material",
     "quote",
-    "pricing"
+    "pricing",
+    "illustrator-2025"
   ],
   "author": "Your Name",
-  "license": "MIT"
+  "license": "MIT",
+  "engines": {
+    "node": ">=17.7.1"
+  },
+  "cep": {
+    "version": "12.0",
+    "chromium": "99",
+    "nodejs": "17.7.1",
+    "supportedApps": [
+      {
+        "name": "Illustrator",
+        "version": "29.0+",
+        "code": "ILST"
+      }
+    ]
+  }
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ExtensionManifest
-    Version="10.0"
-    ExtensionBundleId="com.illustrator.quote"
+    Version="12.0"
+    ExtensionBundleId="com.illustrator.quote.panel"
     ExtensionBundleVersion="1.0.0"
     ExtensionBundleName="Illustrator Quote Plugin"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -13,13 +13,14 @@
 
   <ExecutionEnvironment>
     <HostList>
-      <Host Name="ILST" Version="[25.0,99.9]" />
+      <!-- CEP 12 supports Illustrator 2025 and later -->
+      <Host Name="ILST" Version="[29.0,99.9]" />
     </HostList>
     <LocaleList>
       <Locale Code="All" />
     </LocaleList>
     <RequiredRuntimeList>
-      <RequiredRuntime Name="CSXS" Version="10.0" />
+      <RequiredRuntime Name="CSXS" Version="12.0" />
     </RequiredRuntimeList>
   </ExecutionEnvironment>
 
@@ -34,6 +35,8 @@
             <Parameter>--remote-debugging-port=8088</Parameter>
             <Parameter>--allow-file-access-from-files</Parameter>
             <Parameter>--allow-file-access</Parameter>
+            <Parameter>--disable-web-security</Parameter>
+            <Parameter>--enable-nodejs</Parameter>
           </CEFCommandLine>
         </Resources>
         <Lifecycle>

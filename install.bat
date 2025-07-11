@@ -67,9 +67,11 @@ if errorlevel 1 (
 
 REM 启用 CEP 调试模式
 echo 🔧 启用 CEP 调试模式...
+REM 支持 CEP 10, 11, 12
 reg add "HKEY_CURRENT_USER\Software\Adobe\CSXS.10" /v PlayerDebugMode /t REG_SZ /d 1 /f >nul 2>&1
 reg add "HKEY_CURRENT_USER\Software\Adobe\CSXS.11" /v PlayerDebugMode /t REG_SZ /d 1 /f >nul 2>&1
-echo    调试模式已启用
+reg add "HKEY_CURRENT_USER\Software\Adobe\CSXS.12" /v PlayerDebugMode /t REG_SZ /d 1 /f >nul 2>&1
+echo    调试模式已启用 (CEP 10, 11, 12)
 
 echo.
 echo ✅ 安装完成！
@@ -80,10 +82,17 @@ echo    2. 菜单栏 → 窗口 → 扩展 → Illustrator Quote
 echo    3. 插件面板将显示在右侧
 echo.
 echo 🛠️  如果插件不显示，请检查：
-echo    - Illustrator 版本是否支持 CEP 扩展
+echo    - Illustrator 版本是否为 2025 或更高版本 (支持 CEP 12)
 echo    - 是否已重启 Illustrator
 echo    - 调试模式是否正确启用
 echo.
-echo 📖 详细使用说明请查看 README.md
+echo 📝 CEP 12 要求：
+echo    - Adobe Illustrator 2025 (版本 29.0) 或更高版本
+echo    - 支持 Chromium 99 和 Node.js 17.7.1
 echo.
-pause 
+echo 🔍 调试信息：
+echo    - 调试端口：http://localhost:8088
+echo    - 在插件面板中右键 → 检查元素 → Console
+echo.
+echo 按任意键退出...
+pause >nul 
