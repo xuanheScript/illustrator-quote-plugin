@@ -61,10 +61,10 @@ if (fs.existsSync('dist/CSXS/manifest.xml')) {
 
   // 检查关键配置
   const checks = [
-    { name: 'ExtensionBundleId', regex: /ExtensionBundleId="com\.illustrator\.quote"/, required: true },
+    { name: 'ExtensionBundleId', regex: /ExtensionBundleId="com\.illustrator\.quote\.panel"/, required: true },
     { name: 'Host Name ILST', regex: /Host Name="ILST"/, required: true },
     { name: 'MainPath', regex: /MainPath>\.\/index\.html<\/MainPath/, required: true },
-    { name: 'CSXS Version', regex: /RequiredRuntime Name="CSXS" Version="12\.0"/, required: true }
+    { name: 'CSXS Version', regex: /RequiredRuntime Name="CSXS" Version="10\.0"/, required: true }
   ];
 
   checks.forEach(check => {
@@ -169,8 +169,8 @@ console.log('   - 复制 dist 文件夹并重命名为：com.illustrator.quote.p
 console.log('');
 
 console.log('5. 启用调试模式：');
-console.log('   - macOS: defaults write com.adobe.CSXS.12 PlayerDebugMode 1');
-console.log('   - Windows: 注册表添加 HKEY_CURRENT_USER\\Software\\Adobe\\CSXS.12\\PlayerDebugMode=1');
+console.log('   - macOS: defaults write com.adobe.CSXS.10 PlayerDebugMode 1');
+console.log('   - Windows: 注册表添加 HKEY_CURRENT_USER\\Software\\Adobe\\CSXS.10\\PlayerDebugMode=1');
 console.log('');
 
 console.log('6. 常见白屏原因：');
