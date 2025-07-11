@@ -58,15 +58,15 @@ if (missingFiles.length > 0) {
 console.log('\n📋 检查 manifest.xml...');
 if (fs.existsSync('dist/CSXS/manifest.xml')) {
   const manifest = fs.readFileSync('dist/CSXS/manifest.xml', 'utf8');
-  
+
   // 检查关键配置
   const checks = [
     { name: 'ExtensionBundleId', regex: /ExtensionBundleId="com\.illustrator\.quote"/, required: true },
     { name: 'Host Name ILST', regex: /Host Name="ILST"/, required: true },
     { name: 'MainPath', regex: /MainPath>\.\/index\.html<\/MainPath/, required: true },
-    { name: 'CSXS Version', regex: /RequiredRuntime Name="CSXS" Version="10\.0"/, required: true }
+    { name: 'CSXS Version', regex: /RequiredRuntime Name="CSXS" Version="12\.0"/, required: true }
   ];
-  
+
   checks.forEach(check => {
     if (check.regex.test(manifest)) {
       console.log(`✅ ${check.name}`);
@@ -82,13 +82,13 @@ if (fs.existsSync('dist/CSXS/manifest.xml')) {
 console.log('\n📄 检查 index.html...');
 if (fs.existsSync('dist/index.html')) {
   const html = fs.readFileSync('dist/index.html', 'utf8');
-  
+
   const htmlChecks = [
     { name: 'CSInterface 引用', regex: /src="\.\/lib\/CSInterface\.js"/, required: true },
     { name: 'JavaScript 引用', regex: /src="\.\/assets\/index\.js"/, required: true },
     { name: 'Root 元素', regex: /<div id="root">/, required: true }
   ];
-  
+
   htmlChecks.forEach(check => {
     if (check.regex.test(html)) {
       console.log(`✅ ${check.name}`);
@@ -96,7 +96,7 @@ if (fs.existsSync('dist/index.html')) {
       console.log(`❌ ${check.name} - 缺失或错误`);
     }
   });
-  
+
   // 检查是否有单独的CSS引用（不应该有，因为CSS已内联）
   if (html.includes('index.css')) {
     console.log('⚠️  发现单独的 CSS 引用，但 CSS 已内联到 JS 中');
@@ -111,7 +111,7 @@ if (fs.existsSync('dist/index.html')) {
 console.log('\n🔗 检查 CSInterface.js...');
 if (fs.existsSync('dist/lib/CSInterface.js')) {
   const csInterface = fs.readFileSync('dist/lib/CSInterface.js', 'utf8');
-  
+
   if (csInterface.includes('CSInterface') && csInterface.includes('evalScript')) {
     console.log('✅ CSInterface 库正常');
   } else {
@@ -125,7 +125,7 @@ if (fs.existsSync('dist/lib/CSInterface.js')) {
 console.log('\n📦 检查构建脚本...');
 if (fs.existsSync('package.json')) {
   const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-  
+
   const scripts = ['build', 'build:cep', 'prepare-cep'];
   scripts.forEach(script => {
     if (pkg.scripts && pkg.scripts[script]) {
@@ -169,8 +169,8 @@ console.log('   - 复制 dist 文件夹并重命名为：com.illustrator.quote.p
 console.log('');
 
 console.log('5. 启用调试模式：');
-console.log('   - macOS: defaults write com.adobe.CSXS.10 PlayerDebugMode 1');
-console.log('   - Windows: 注册表添加 HKEY_CURRENT_USER\\Software\\Adobe\\CSXS.10\\PlayerDebugMode=1');
+console.log('   - macOS: defaults write com.adobe.CSXS.12 PlayerDebugMode 1');
+console.log('   - Windows: 注册表添加 HKEY_CURRENT_USER\\Software\\Adobe\\CSXS.12\\PlayerDebugMode=1');
 console.log('');
 
 console.log('6. 常见白屏原因：');

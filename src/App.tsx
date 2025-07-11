@@ -1,19 +1,26 @@
 import { useState, useEffect } from 'react'
 import './App.css'
 
-// 定义材质选项
-const MATERIALS = [
-  { name: '亚克力', price: 200 },
-  { name: '木材', price: 150 },
-  { name: '金属', price: 300 },
-  { name: '玻璃', price: 250 },
-  { name: '塑料', price: 100 },
-  { name: '石材', price: 400 },
-  { name: '皮革', price: 350 },
-  { name: '布料', price: 80 }
+// 材质数据接口
+interface Material {
+  id: string;
+  name: string;
+  price: number;
+}
+
+// 默认材质数据
+const DEFAULT_MATERIALS: Material[] = [
+  { id: '1', name: '亚克力板', price: 120 },
+  { id: '2', name: 'PVC板', price: 80 },
+  { id: '3', name: '铝塑板', price: 150 },
+  { id: '4', name: '不锈钢板', price: 200 },
+  { id: '5', name: '木质板', price: 100 }
 ];
 
-// 声明 CSInterface 类型
+// 本地存储键名
+const STORAGE_KEY = 'illustrator-quote-materials';
+
+// 扩展 Window 接口
 declare global {
   interface Window {
     CSInterface: any;
@@ -21,14 +28,172 @@ declare global {
 }
 
 function App() {
-  const [selectedMaterial, setSelectedMaterial] = useState(MATERIALS[0].name);
-  const [unitPrice, setUnitPrice] = useState(MATERIALS[0].price);
+  const [materials, setMaterials] = useState<Material[]>([]);
+  const [selectedMaterial, setSelectedMaterial] = useState('');
+  const [unitPrice, setUnitPrice] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [message, setMessage] = useState('');
   const [csInterface, setCsInterface] = useState<any>(null);
   const [debugInfo, setDebugInfo] = useState('');
 
+  // 材质管理相关状态
+  const [showMaterialManager, setShowMaterialManager] = useState(false);
+  const [editingMaterial, setEditingMaterial] = useState<Material | null>(null);
+  const [newMaterialName, setNewMaterialName] = useState('');
+  const [newMaterialPrice, setNewMaterialPrice] = useState(0);
+
+  // JSON polyfill for ExtendScript
+  const jsonPolyfill = `
+    if (typeof JSON === 'undefined') {
+      var JSON = {
+        stringify: function(obj) {
+          if (obj === null) return 'null';
+          if (typeof obj === 'undefined') return 'undefined';
+          if (typeof obj === 'string') return '"' + obj.replace(/"/g, '\\\\"') + '"';
+          if (typeof obj === 'number' || typeof obj === 'boolean') return obj.toString();
+          if (obj instanceof Array) {
+            var items = [];
+            for (var i = 0; i < obj.length; i++) {
+              items.push(JSON.stringify(obj[i]));
+            }
+            return '[' + items.join(',') + ']';
+          }
+          if (typeof obj === 'object') {
+            var items = [];
+            for (var key in obj) {
+              if (obj.hasOwnProperty(key)) {
+                items.push(JSON.stringify(key) + ':' + JSON.stringify(obj[key]));
+              }
+            }
+            return '{' + items.join(',') + '}';
+          }
+          return 'null';
+        },
+        parse: function(str) {
+          return eval('(' + str + ')');
+        }
+      };
+    }
+  `;
+
+  // 加载材质数据
+  const loadMaterials = () => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsedMaterials = JSON.parse(stored);
+        setMaterials(parsedMaterials);
+        if (parsedMaterials.length > 0) {
+          setSelectedMaterial(parsedMaterials[0].name);
+          setUnitPrice(parsedMaterials[0].price);
+        }
+      } else {
+        // 首次使用，设置默认材质
+        setMaterials(DEFAULT_MATERIALS);
+        setSelectedMaterial(DEFAULT_MATERIALS[0].name);
+        setUnitPrice(DEFAULT_MATERIALS[0].price);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_MATERIALS));
+      }
+    } catch (error) {
+      console.error('加载材质数据失败:', error);
+      setMaterials(DEFAULT_MATERIALS);
+      setSelectedMaterial(DEFAULT_MATERIALS[0].name);
+      setUnitPrice(DEFAULT_MATERIALS[0].price);
+    }
+  };
+
+  // 保存材质数据
+  const saveMaterials = (materialsToSave: Material[]) => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(materialsToSave));
+      setMaterials(materialsToSave);
+    } catch (error) {
+      console.error('保存材质数据失败:', error);
+    }
+  };
+
+  // 添加材质
+  const addMaterial = () => {
+    if (!newMaterialName.trim() || newMaterialPrice <= 0) {
+      alert('请输入有效的材质名称和价格');
+      return;
+    }
+
+    const newMaterial: Material = {
+      id: Date.now().toString(),
+      name: newMaterialName.trim(),
+      price: newMaterialPrice
+    };
+
+    const updatedMaterials = [...materials, newMaterial];
+    saveMaterials(updatedMaterials);
+    setNewMaterialName('');
+    setNewMaterialPrice(0);
+  };
+
+  // 编辑材质
+  const editMaterial = (material: Material) => {
+    setEditingMaterial(material);
+    setNewMaterialName(material.name);
+    setNewMaterialPrice(material.price);
+  };
+
+  // 保存编辑的材质
+  const saveEditedMaterial = () => {
+    if (!editingMaterial || !newMaterialName.trim() || newMaterialPrice <= 0) {
+      alert('请输入有效的材质名称和价格');
+      return;
+    }
+
+    const updatedMaterials = materials.map(material =>
+      material.id === editingMaterial.id
+        ? { ...material, name: newMaterialName.trim(), price: newMaterialPrice }
+        : material
+    );
+
+    saveMaterials(updatedMaterials);
+
+    // 如果编辑的是当前选中的材质，更新选中状态
+    if (selectedMaterial === editingMaterial.name) {
+      setSelectedMaterial(newMaterialName.trim());
+      setUnitPrice(newMaterialPrice);
+    }
+
+    setEditingMaterial(null);
+    setNewMaterialName('');
+    setNewMaterialPrice(0);
+  };
+
+  // 删除材质
+  const deleteMaterial = (materialId: string) => {
+    if (materials.length <= 1) {
+      alert('至少需要保留一个材质');
+      return;
+    }
+
+    if (confirm('确定要删除这个材质吗？')) {
+      const materialToDelete = materials.find(m => m.id === materialId);
+      const updatedMaterials = materials.filter(material => material.id !== materialId);
+      saveMaterials(updatedMaterials);
+
+      // 如果删除的是当前选中的材质，切换到第一个材质
+      if (materialToDelete && selectedMaterial === materialToDelete.name) {
+        setSelectedMaterial(updatedMaterials[0].name);
+        setUnitPrice(updatedMaterials[0].price);
+      }
+    }
+  };
+
+  // 取消编辑
+  const cancelEdit = () => {
+    setEditingMaterial(null);
+    setNewMaterialName('');
+    setNewMaterialPrice(0);
+  };
+
   useEffect(() => {
+    loadMaterials();
+
     // 初始化 CSInterface
     if (window.CSInterface) {
       const cs = new window.CSInterface();
@@ -36,15 +201,6 @@ function App() {
       console.log('CSInterface initialized');
       setMessage('插件已初始化，可以开始使用');
       cs.evalScript('$.writeln("脚本加载成功")');
-
-      // 动态调用 inspect() 打开控制台
-      try {
-        alert('打开控制台');
-        eval("require('nw.gui').Window.get().showDevTools()");
-      } catch(e) {
-        alert('无法打开调试器：');
-        console.log('无法打开调试器：', e);
-      }
     } else {
       console.error('CSInterface not found');
       setMessage('错误：CSInterface 未找到');
@@ -54,7 +210,7 @@ function App() {
   // 处理材质选择变化
   const handleMaterialChange = (materialName: string) => {
     setSelectedMaterial(materialName);
-    const material = MATERIALS.find(m => m.name === materialName);
+    const material = materials.find(m => m.name === materialName);
     if (material) {
       setUnitPrice(material.price);
     }
@@ -72,33 +228,45 @@ function App() {
 
     // 简单的调试脚本
     const script = `
-      try {
-        var result = {
-          success: true,
-          message: "调试测试成功",
-          data: {
-            appName: app.name,
-            appVersion: app.version,
-            documentExists: !!app.activeDocument,
-            selectionCount: app.activeDocument ? app.activeDocument.selection.length : 0
-          }
-        };
-        JSON.stringify(result);
-      } catch (error) {
-        JSON.stringify({
-          success: false,
-          message: "调试测试失败: " + error.message,
-          error: error.toString()
-        });
-      }
+      ${jsonPolyfill}
+      
+      (function() {
+        try {
+          var result = {
+            success: true,
+            message: "调试测试成功",
+            data: {
+              appName: app.name,
+              appVersion: app.version,
+              documentExists: !!app.activeDocument,
+              selectionCount: app.activeDocument ? app.activeDocument.selection.length : 0
+            }
+          };
+          return JSON.stringify(result);
+        } catch (error) {
+          return JSON.stringify({
+            success: false,
+            message: "调试测试失败: " + error.message,
+            error: error.toString()
+          });
+        }
+      })();
     `;
-    
+
     console.log('Running debug test');
-    
+
     csInterface.evalScript(script, (result: string) => {
       setIsProcessing(false);
       console.log('Debug result:', result);
-      
+
+      // 检查result是否存在且为字符串
+      if (!result || typeof result !== 'string') {
+        console.error('Invalid result:', result);
+        setMessage(`调试失败：脚本执行无响应或返回无效结果`);
+        setDebugInfo(`原始结果: ${result}`);
+        return;
+      }
+
       try {
         const response = JSON.parse(result);
         if (response.success) {
@@ -128,78 +296,90 @@ function App() {
 
     // 使用内联脚本，避免文件路径问题
     const script = `
-      try {
-        // 检查文档
-        if (!app.activeDocument) {
-          JSON.stringify({
-            success: false,
-            message: "请先打开一个文档"
-          });
-        } else if (app.activeDocument.selection.length === 0) {
-          JSON.stringify({
-            success: false,
-            message: "请先选择要应用材质的对象"
-          });
-        } else {
-          var doc = app.activeDocument;
-          var selectedItem = doc.selection[0];
-          var bounds = selectedItem.geometricBounds;
-          
-          // 计算面积（简化）
-          var width = Math.abs(bounds[2] - bounds[0]);
-          var height = Math.abs(bounds[1] - bounds[3]);
-          var areaPoints = width * height;
-          var areaM2 = areaPoints * 0.000000124; // 点²转平方米
-          var totalPrice = areaM2 * ${unitPrice};
-          
-          // 创建文本标注
-          var textContent = "材质: ${selectedMaterial}\\n" +
-                           "面积: " + areaM2.toFixed(3) + " m²\\n" +
-                           "单价: ${unitPrice} 元/m²\\n" +
-                           "总价: " + totalPrice.toFixed(2) + " 元";
-          
-          var textFrame = doc.textFrames.add();
-          textFrame.contents = textContent;
-          textFrame.position = [bounds[2] + 20, bounds[1]];
-          textFrame.textRange.characterAttributes.size = 10;
-          
-          // 添加标签
-          var tag = selectedItem.tags.add();
-          tag.name = "QuoteMaterial";
-          tag.value = JSON.stringify({
-            material: "${selectedMaterial}",
-            unitPrice: ${unitPrice},
-            area: areaM2,
-            totalPrice: totalPrice,
-            timestamp: new Date().getTime()
-          });
-          
-          JSON.stringify({
-            success: true,
-            message: "成功应用材质到对象",
-            data: {
+      ${jsonPolyfill}
+      
+      (function() {
+        try {
+          // 检查文档
+          if (!app.activeDocument) {
+            return JSON.stringify({
+              success: false,
+              message: "请先打开一个文档"
+            });
+          } else if (app.activeDocument.selection.length === 0) {
+            return JSON.stringify({
+              success: false,
+              message: "请先选择要应用材质的对象"
+            });
+          } else {
+            var doc = app.activeDocument;
+            var selectedItem = doc.selection[0];
+            var bounds = selectedItem.geometricBounds;
+            
+            // 计算面积（简化）
+            var width = Math.abs(bounds[2] - bounds[0]);
+            var height = Math.abs(bounds[1] - bounds[3]);
+            var areaPoints = width * height;
+            var areaM2 = areaPoints * 0.000000124; // 点²转平方米
+            var totalPrice = areaM2 * ${unitPrice};
+            
+            // 创建文本标注
+            var textContent = "材质: ${selectedMaterial}\\n" +
+                             "长 * 高: " + width.toFixed(3) + " * " + height.toFixed(3) + " mm\\n" +
+                             "面积: " + areaM2.toFixed(3) + " 平方米\\n" +
+                             "单价: ${unitPrice} 元/平方米\\n" +
+                             "总价: " + totalPrice.toFixed(2) + " 元";
+            
+            var textFrame = doc.textFrames.add();
+            textFrame.contents = textContent;
+            textFrame.position = [bounds[2] + 20, bounds[1]];
+            textFrame.textRange.characterAttributes.size = 10;
+            
+            // 添加标签
+            var tag = selectedItem.tags.add();
+            tag.name = "QuoteMaterial";
+            tag.value = JSON.stringify({
               material: "${selectedMaterial}",
-              area: areaM2.toFixed(3),
               unitPrice: ${unitPrice},
-              totalPrice: totalPrice.toFixed(2)
-            }
+              area: areaM2,
+              totalPrice: totalPrice,
+              timestamp: new Date().getTime()
+            });
+            
+            return JSON.stringify({
+              success: true,
+              message: "成功应用材质到对象",
+              data: {
+                material: "${selectedMaterial}",
+                area: areaM2.toFixed(3),
+                unitPrice: ${unitPrice},
+                totalPrice: totalPrice.toFixed(2)
+              }
+            });
+          }
+        } catch (error) {
+          return JSON.stringify({
+            success: false,
+            message: "应用材质时发生错误: " + error.message,
+            error: error.toString()
           });
         }
-      } catch (error) {
-        JSON.stringify({
-          success: false,
-          message: "应用材质时发生错误: " + error.message,
-          error: error.toString()
-        });
-      }
+      })();
     `;
-    
+
     console.log('Applying material');
-    
+
     csInterface.evalScript(script, (result: string) => {
       setIsProcessing(false);
       console.log('Apply result:', result);
-      
+
+      // 检查result是否存在且为字符串
+      if (!result || typeof result !== 'string') {
+        console.error('Invalid result:', result);
+        setMessage(`应用材质失败：脚本执行无响应或返回无效结果`);
+        return;
+      }
+
       try {
         const response = JSON.parse(result);
         if (response.success) {
@@ -225,13 +405,16 @@ function App() {
     setMessage('正在导出报价...');
 
     const script = `
-      try {
-        if (!app.activeDocument) {
-          JSON.stringify({
-            success: false,
-            message: "请先打开一个文档"
-          });
-        } else {
+      ${jsonPolyfill}
+      
+      (function() {
+        try {
+          if (!app.activeDocument) {
+            return JSON.stringify({
+              success: false,
+              message: "请先打开一个文档"
+            });
+          } else {
           var doc = app.activeDocument;
           var quotedItems = [];
           
@@ -260,7 +443,7 @@ function App() {
           }
           
           if (quotedItems.length === 0) {
-            JSON.stringify({
+            return JSON.stringify({
               success: false,
               message: "未找到任何已应用材质的对象"
             });
@@ -300,7 +483,7 @@ function App() {
               file.write(csvContent);
               file.close();
               
-              JSON.stringify({
+              return JSON.stringify({
                 success: true,
                 message: "报价单已导出到桌面: " + fileName,
                 data: {
@@ -310,7 +493,7 @@ function App() {
                 }
               });
             } else {
-              JSON.stringify({
+              return JSON.stringify({
                 success: false,
                 message: "无法创建文件: " + filePath
               });
@@ -318,20 +501,28 @@ function App() {
           }
         }
       } catch (error) {
-        JSON.stringify({
+        return JSON.stringify({
           success: false,
           message: "导出报价时发生错误: " + error.message,
           error: error.toString()
         });
       }
+      })();
     `;
-    
+
     console.log('Exporting quote');
-    
+
     csInterface.evalScript(script, (result: string) => {
       setIsProcessing(false);
       console.log('Export result:', result);
-      
+
+      // 检查result是否存在且为字符串
+      if (!result || typeof result !== 'string') {
+        console.error('Invalid result:', result);
+        setMessage(`导出失败：脚本执行无响应或返回无效结果`);
+        return;
+      }
+
       try {
         const response = JSON.parse(result);
         if (response.success) {
@@ -356,10 +547,10 @@ function App() {
       <div className="plugin-content">
         {/* 调试信息 */}
         {debugInfo && (
-          <div className="debug-info" style={{ 
-            background: '#f0f0f0', 
-            padding: '8px', 
-            borderRadius: '4px', 
+          <div className="debug-info" style={{
+            background: '#f0f0f0',
+            padding: '8px',
+            borderRadius: '4px',
             fontSize: '11px',
             marginBottom: '16px',
             fontFamily: 'monospace'
@@ -372,14 +563,14 @@ function App() {
         {/* 材质选择 */}
         <div className="form-group">
           <label htmlFor="material-select">材质类型：</label>
-          <select 
+          <select
             id="material-select"
             value={selectedMaterial}
             onChange={(e) => handleMaterialChange(e.target.value)}
             className="material-select"
           >
-            {MATERIALS.map(material => (
-              <option key={material.name} value={material.name}>
+            {materials.map(material => (
+              <option key={material.id} value={material.name}>
                 {material.name}
               </option>
             ))}
@@ -400,9 +591,114 @@ function App() {
           />
         </div>
 
+        {/* 材质管理 */}
+        <div className="material-management">
+          <button
+            onClick={() => setShowMaterialManager(!showMaterialManager)}
+            className="manage-button"
+            style={{ backgroundColor: '#28a745', marginBottom: '10px' }}
+          >
+            {showMaterialManager ? '隐藏材质管理' : '管理材质'}
+          </button>
+
+          {showMaterialManager && (
+            <div className="material-manager" style={{
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+              padding: '15px',
+              marginBottom: '15px',
+              backgroundColor: '#f8f9fa'
+            }}>
+              <h4>材质管理</h4>
+
+              {/* 添加/编辑材质表单 */}
+              <div className="material-form" style={{ marginBottom: '15px' }}>
+                <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+                  <input
+                    type="text"
+                    placeholder="材质名称"
+                    value={newMaterialName}
+                    onChange={(e) => setNewMaterialName(e.target.value)}
+                    style={{ flex: 1, padding: '5px' }}
+                  />
+                  <input
+                    type="number"
+                    placeholder="单价"
+                    value={newMaterialPrice || ''}
+                    onChange={(e) => setNewMaterialPrice(Number(e.target.value))}
+                    style={{ width: '100px', padding: '5px' }}
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  {editingMaterial ? (
+                    <>
+                      <button
+                        onClick={saveEditedMaterial}
+                        style={{ backgroundColor: '#007bff', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '3px' }}
+                      >
+                        保存修改
+                      </button>
+                      <button
+                        onClick={cancelEdit}
+                        style={{ backgroundColor: '#6c757d', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '3px' }}
+                      >
+                        取消
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      onClick={addMaterial}
+                      style={{ backgroundColor: '#28a745', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '3px' }}
+                    >
+                      添加材质
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* 材质列表 */}
+              <div className="material-list">
+                <h5>现有材质:</h5>
+                {materials.map(material => (
+                  <div key={material.id} style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '8px',
+                    marginBottom: '5px',
+                    backgroundColor: selectedMaterial === material.name ? '#e3f2fd' : 'white',
+                    border: '1px solid #ddd',
+                    borderRadius: '3px'
+                  }}>
+                    <span>
+                      <strong>{material.name}</strong> - {material.price} 元/m²
+                    </span>
+                    <div style={{ display: 'flex', gap: '5px' }}>
+                      <button
+                        onClick={() => editMaterial(material)}
+                        style={{ backgroundColor: '#ffc107', color: 'black', border: 'none', padding: '3px 6px', borderRadius: '3px', fontSize: '12px' }}
+                      >
+                        编辑
+                      </button>
+                      <button
+                        onClick={() => deleteMaterial(material.id)}
+                        style={{ backgroundColor: '#dc3545', color: 'white', border: 'none', padding: '3px 6px', borderRadius: '3px', fontSize: '12px' }}
+                      >
+                        删除
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* 操作按钮 */}
         <div className="button-group">
-          <button 
+          <button
             onClick={runDebugTest}
             disabled={isProcessing}
             className="apply-button"
@@ -410,16 +706,16 @@ function App() {
           >
             {isProcessing ? '测试中...' : '调试测试'}
           </button>
-          
-          <button 
+
+          <button
             onClick={applyMaterial}
             disabled={isProcessing}
             className="apply-button"
           >
             {isProcessing ? '处理中...' : '应用材质'}
           </button>
-          
-          <button 
+
+          <button
             onClick={exportQuote}
             disabled={isProcessing}
             className="export-button"
