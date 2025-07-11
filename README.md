@@ -60,27 +60,59 @@
 
 ## 🚀 安装方法
 
+### 版本选择指南
+
+请根据您的 Illustrator 版本选择对应的插件版本：
+
+| Illustrator 版本 | CEP 版本 | 插件版本 | 分支 | 推荐程度 |
+|-----------------|---------|---------|------|---------|
+| **2025+** | **CEP 12** | **v2.x.x** | **main** | ✅ **最新版本** |
+| 2021-2024 | CEP 10 | v1.5.x | cep10-support | 🟡 **稳定兼容** |
+
 ### 自动安装（推荐）
 
-#### macOS/Linux
+#### CEP 12 版本 (Illustrator 2025+)
+
 ```bash
-# 克隆仓库
+# macOS/Linux
 git clone https://github.com/yourusername/illustrator-quote-plugin.git
 cd illustrator-quote-plugin
-
-# 运行安装脚本
 chmod +x install.sh
 ./install.sh
 ```
 
-#### Windows
 ```cmd
-# 克隆仓库
+# Windows
 git clone https://github.com/yourusername/illustrator-quote-plugin.git
 cd illustrator-quote-plugin
-
-# 运行安装脚本
 install.bat
+```
+
+#### CEP 10 版本 (Illustrator 2021-2024)
+
+```bash
+# macOS/Linux
+git clone -b cep10-support https://github.com/yourusername/illustrator-quote-plugin.git
+cd illustrator-quote-plugin
+chmod +x install-cep10.sh
+./install-cep10.sh
+```
+
+```cmd
+# Windows
+git clone -b cep10-support https://github.com/yourusername/illustrator-quote-plugin.git
+cd illustrator-quote-plugin
+install-cep10.bat
+```
+
+### 智能安装（自动检测版本）
+
+```bash
+# macOS/Linux - 自动检测 Illustrator 版本
+git clone https://github.com/yourusername/illustrator-quote-plugin.git
+cd illustrator-quote-plugin
+chmod +x install-auto.sh
+./install-auto.sh
 ```
 
 ### 手动安装
