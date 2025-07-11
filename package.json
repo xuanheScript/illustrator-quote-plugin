@@ -1,7 +1,7 @@
 {
   "name": "illustrator-quote-plugin",
-  "version": "2.0.0",
-  "description": "Adobe Illustrator CEP 12 plugin for material quoting and pricing - supports Illustrator 2025+",
+  "version": "1.5.0",
+  "description": "Adobe Illustrator CEP 10 plugin for material quoting and pricing - supports Illustrator 2021-2024",
   "private": true,
   "type": "module",
   "scripts": {
@@ -20,47 +20,50 @@
     "copy-to-extensions": "echo 'Copy dist folder to CEP extensions directory'"
   },
   "dependencies": {
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.1",
-    "@types/react": "^19.1.8",
-    "@types/react-dom": "^19.1.6",
-    "@vitejs/plugin-react": "^4.6.0",
+    "@types/react": "^18.2.66",
+    "@types/react-dom": "^18.2.22",
+    "@vitejs/plugin-react": "^4.2.1",
     "eslint": "^9.30.1",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.3.0",
-    "typescript": "~5.8.3",
+    "typescript": "~5.6.2",
     "typescript-eslint": "^8.35.1",
-    "vite": "^7.0.4"
+    "vite": "^6.0.1"
   },
   "keywords": [
     "adobe",
     "illustrator",
     "cep",
-    "cep12",
+    "cep10",
     "plugin",
     "extension",
     "material",
     "quote",
     "pricing",
-    "illustrator-2025"
+    "illustrator-2021",
+    "illustrator-2022",
+    "illustrator-2023",
+    "illustrator-2024"
   ],
-  "author": "Your Name",
+  "author": "Illustrator Quote Plugin Team",
   "license": "MIT",
   "engines": {
-    "node": ">=17.7.1"
+    "node": ">=16.14.0"
   },
   "cep": {
-    "version": "12.0",
-    "chromium": "99",
-    "nodejs": "17.7.1",
+    "version": "10.0",
+    "chromium": "89",
+    "nodejs": "16.14.0",
     "supportedApps": [
       {
         "name": "Illustrator",
-        "version": "29.0+",
+        "version": "25.0-28.9",
         "code": "ILST"
       }
     ]

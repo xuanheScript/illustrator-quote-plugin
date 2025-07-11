@@ -1,42 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ExtensionManifest
-    Version="12.0"
-    ExtensionBundleId="com.illustrator.quote.panel"
-    ExtensionBundleVersion="1.0.0"
-    ExtensionBundleName="Illustrator Quote Plugin"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="http://www.adobe.com/schemas/ExtensionManifest.xsd">
-
+<ExtensionManifest Version="10.0" ExtensionBundleId="com.illustrator.quote.panel" ExtensionBundleVersion="1.5.0" ExtensionBundleName="Illustrator Quote Panel">
+  <Author>
+    <![CDATA[Illustrator Quote Plugin Team]]>
+  </Author>
+  <Contact>
+    <![CDATA[https://github.com/yourusername/illustrator-quote-plugin]]>
+  </Contact>
+  <Legal>
+    <![CDATA[MIT License]]>
+  </Legal>
+  <Abstract>
+    <![CDATA[Adobe Illustrator材质报价插件 - CEP 10版本，兼容Illustrator 2021-2024]]>
+  </Abstract>
   <ExtensionList>
-    <Extension Id="com.illustrator.quote.panel" Version="1.0.0" />
+    <Extension Id="com.illustrator.quote.panel" Version="1.5.0" />
   </ExtensionList>
-
   <ExecutionEnvironment>
-    <HostList>
-      <!-- CEP 12 supports Illustrator 2025 and later -->
-      <Host Name="ILST" Version="[29.0,99.9]" />
-    </HostList>
-    <LocaleList>
-      <Locale Code="All" />
-    </LocaleList>
-    <RequiredRuntimeList>
-      <RequiredRuntime Name="CSXS" Version="12.0" />
-    </RequiredRuntimeList>
+    <RequiredRuntime Name="CSXS" Version="10.0" />
+    <RequiredRuntime Name="ApplicationManager" Version="1.0" />
   </ExecutionEnvironment>
-
   <DispatchInfoList>
     <Extension Id="com.illustrator.quote.panel">
       <DispatchInfo>
         <Resources>
           <MainPath>./index.html</MainPath>
-          <!-- 如果要有入口脚本，可以保留一个 ScriptPath -->
-          <!-- <ScriptPath>./jsx/init.jsx</ScriptPath> -->
+          <ScriptPath>./jsx/applyMaterial.jsx</ScriptPath>
+          <ScriptPath>./jsx/exportQuote.jsx</ScriptPath>
           <CEFCommandLine>
-            <Parameter>--remote-debugging-port=8088</Parameter>
-            <Parameter>--allow-file-access-from-files</Parameter>
-            <Parameter>--allow-file-access</Parameter>
-            <Parameter>--disable-web-security</Parameter>
             <Parameter>--enable-nodejs</Parameter>
+            <Parameter>--mixed-context</Parameter>
           </CEFCommandLine>
         </Resources>
         <Lifecycle>
@@ -44,19 +36,19 @@
         </Lifecycle>
         <UI>
           <Type>Panel</Type>
-          <Menu>Illustrator Quote</Menu>
+          <Menu>Illustrator Quote (CEP 10)</Menu>
           <Geometry>
             <Size>
-              <Height>400</Height>
-              <Width>320</Width>
+              <Height>600</Height>
+              <Width>350</Width>
             </Size>
             <MinSize>
-              <Height>300</Height>
-              <Width>280</Width>
+              <Height>400</Height>
+              <Width>300</Width>
             </MinSize>
             <MaxSize>
-              <Height>600</Height>
-              <Width>400</Width>
+              <Height>800</Height>
+              <Width>500</Width>
             </MaxSize>
           </Geometry>
           <Icons>
@@ -66,8 +58,10 @@
             <Icon Type="DarkRollOver">./icons/icon.png</Icon>
           </Icons>
         </UI>
+        <ExtensionData>
+          <Host Name="ILST" Version="[25.0,28.9]" />
+        </ExtensionData>
       </DispatchInfo>
     </Extension>
   </DispatchInfoList>
-
 </ExtensionManifest>
