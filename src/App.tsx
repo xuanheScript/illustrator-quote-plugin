@@ -6,15 +6,16 @@ interface Material {
   id: string;
   name: string;
   price: number;
+  color: string;
 }
 
 // 默认材质数据
 const DEFAULT_MATERIALS: Material[] = [
-  { id: '1', name: '亚克力板', price: 120 },
-  { id: '2', name: 'PVC板', price: 80 },
-  { id: '3', name: '铝塑板', price: 150 },
-  { id: '4', name: '不锈钢板', price: 200 },
-  { id: '5', name: '木质板', price: 100 }
+  { id: '1', name: '亚克力板', price: 120, color: '#0066CC' },
+  { id: '2', name: 'PVC板', price: 80, color: '#00AA00' },
+  { id: '3', name: '铝塑板', price: 150, color: '#FF6600' },
+  { id: '4', name: '不锈钢板', price: 200, color: '#CC0000' },
+  { id: '5', name: '木质板', price: 100, color: '#8B4513' }
 ];
 
 // 本地存储键名
@@ -41,6 +42,12 @@ function App() {
   const [editingMaterial, setEditingMaterial] = useState<Material | null>(null);
   const [newMaterialName, setNewMaterialName] = useState('');
   const [newMaterialPrice, setNewMaterialPrice] = useState(0);
+  const [newMaterialColor, setNewMaterialColor] = useState('#0066CC');
+
+  // 颜色验证函数
+  const isValidColor = (color: string): boolean => {
+    return /^#[0-9A-Fa-f]{6}$/.test(color);
+  };
 
   // JSON polyfill for ExtendScript
   const jsonPolyfill = `
@@ -119,16 +126,23 @@ function App() {
       return;
     }
 
+    if (!isValidColor(newMaterialColor)) {
+      alert('请输入有效的颜色值，格式如：#FF0000');
+      return;
+    }
+
     const newMaterial: Material = {
       id: Date.now().toString(),
       name: newMaterialName.trim(),
-      price: newMaterialPrice
+      price: newMaterialPrice,
+      color: newMaterialColor
     };
 
     const updatedMaterials = [...materials, newMaterial];
     saveMaterials(updatedMaterials);
     setNewMaterialName('');
     setNewMaterialPrice(0);
+    setNewMaterialColor('#0066CC');
   };
 
   // 编辑材质
@@ -136,6 +150,7 @@ function App() {
     setEditingMaterial(material);
     setNewMaterialName(material.name);
     setNewMaterialPrice(material.price);
+    setNewMaterialColor(material.color);
   };
 
   // 保存编辑的材质
@@ -145,9 +160,14 @@ function App() {
       return;
     }
 
+    if (!isValidColor(newMaterialColor)) {
+      alert('请输入有效的颜色值，格式如：#FF0000');
+      return;
+    }
+
     const updatedMaterials = materials.map(material =>
       material.id === editingMaterial.id
-        ? { ...material, name: newMaterialName.trim(), price: newMaterialPrice }
+        ? { ...material, name: newMaterialName.trim(), price: newMaterialPrice, color: newMaterialColor }
         : material
     );
 
@@ -162,6 +182,7 @@ function App() {
     setEditingMaterial(null);
     setNewMaterialName('');
     setNewMaterialPrice(0);
+    setNewMaterialColor('#0066CC');
   };
 
   // 删除材质
@@ -189,6 +210,7 @@ function App() {
     setEditingMaterial(null);
     setNewMaterialName('');
     setNewMaterialPrice(0);
+    setNewMaterialColor('#0066CC');
   };
 
   useEffect(() => {
@@ -284,10 +306,16 @@ function App() {
     });
   };
 
-  // 应用材质功能（简化版）
+  // 应用材质功能（增强版）
   const applyMaterial = () => {
     if (!csInterface) {
       setMessage('错误：CSInterface 未初始化');
+      return;
+    }
+
+    const currentMaterial = materials.find(m => m.name === selectedMaterial);
+    if (!currentMaterial) {
+      setMessage('错误：未找到选中的材质');
       return;
     }
 
@@ -325,17 +353,62 @@ function App() {
             
             // 创建文本标注
             var textContent = "材质: ${selectedMaterial}\\n" +
-                             "长 * 高: " + width.toFixed(3) + " * " + height.toFixed(3) + " mm\\n" +
+                             "宽 * 高: " + width.toFixed(3) + " * " + height.toFixed(3) + " mm\\n" +
                              "面积: " + areaM2.toFixed(3) + " 平方米\\n" +
                              "单价: ${unitPrice} 元/平方米\\n" +
                              "总价: " + totalPrice.toFixed(2) + " 元";
             
             var textFrame = doc.textFrames.add();
             textFrame.contents = textContent;
-            textFrame.position = [bounds[2] + 20, bounds[1]];
-            textFrame.textRange.characterAttributes.size = 10;
             
-            // 添加标签
+            // 安全地设置文字属性
+            try {
+              textFrame.textRange.characterAttributes.size = 10;
+            } catch (e) {
+              // 如果设置失败，使用默认大小
+            }
+            
+            // 简单定位：优先右侧，如果空间不足则左侧
+            var textX = bounds[2] + 20;
+            var textY = bounds[1];
+            
+            // 检查是否超出画布右边界
+            if (textX + 150 > doc.width) {
+              textX = bounds[0] - 150;
+            }
+            
+            textFrame.position = [textX, textY];
+            
+            // 创建RGB颜色
+            var materialColor = new RGBColor();
+            materialColor.red = parseInt("${currentMaterial.color}".substr(1, 2), 16);
+            materialColor.green = parseInt("${currentMaterial.color}".substr(3, 2), 16);
+            materialColor.blue = parseInt("${currentMaterial.color}".substr(5, 2), 16);
+            
+            // 方案1：给原始对象添加轮廓线
+            selectedItem.stroked = true;
+            selectedItem.strokeColor = materialColor;
+            selectedItem.strokeWidth = 5;
+            
+            // 方案2：创建一个轮廓复制对象（确保轮廓线可见）
+            var outlineCopy = selectedItem.duplicate();
+            outlineCopy.filled = false;
+            outlineCopy.stroked = true;
+            outlineCopy.strokeColor = materialColor;
+            outlineCopy.strokeWidth = 5;
+            
+            // 将轮廓复制对象放在最前面
+            outlineCopy.move(doc.layers[0], ElementPlacement.PLACEATBEGINNING);
+            
+            // 创建分组
+            var group = doc.groupItems.add();
+            group.name = "Quote_${selectedMaterial}_" + new Date().getTime();
+            
+            // 将元素添加到分组
+            outlineCopy.move(group, ElementPlacement.INSIDE);
+            textFrame.move(group, ElementPlacement.INSIDE);
+            
+            // 添加标签到原始对象
             var tag = selectedItem.tags.add();
             tag.name = "QuoteMaterial";
             tag.value = JSON.stringify({
@@ -343,6 +416,8 @@ function App() {
               unitPrice: ${unitPrice},
               area: areaM2,
               totalPrice: totalPrice,
+              color: "${currentMaterial.color}",
+              groupName: group.name,
               timestamp: new Date().getTime()
             });
             
@@ -353,7 +428,8 @@ function App() {
                 material: "${selectedMaterial}",
                 area: areaM2.toFixed(3),
                 unitPrice: ${unitPrice},
-                totalPrice: totalPrice.toFixed(2)
+                totalPrice: totalPrice.toFixed(2),
+                color: "${currentMaterial.color}"
               }
             });
           }
@@ -563,18 +639,31 @@ function App() {
         {/* 材质选择 */}
         <div className="form-group">
           <label htmlFor="material-select">材质类型：</label>
-          <select
-            id="material-select"
-            value={selectedMaterial}
-            onChange={(e) => handleMaterialChange(e.target.value)}
-            className="material-select"
-          >
-            {materials.map(material => (
-              <option key={material.id} value={material.name}>
-                {material.name}
-              </option>
-            ))}
-          </select>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <select
+              id="material-select"
+              value={selectedMaterial}
+              onChange={(e) => handleMaterialChange(e.target.value)}
+              className="material-select"
+              style={{ flex: 1 }}
+            >
+              {materials.map(material => (
+                <option key={material.id} value={material.name}>
+                  {material.name}
+                </option>
+              ))}
+            </select>
+            <div style={{
+              width: '24px',
+              height: '24px',
+              backgroundColor: materials.find(m => m.name === selectedMaterial)?.color || '#000000',
+              border: '1px solid #ccc',
+              borderRadius: '3px'
+            }}></div>
+            <small style={{ color: '#666', fontSize: '11px' }}>
+              {materials.find(m => m.name === selectedMaterial)?.color || '#000000'}
+            </small>
+          </div>
         </div>
 
         {/* 单价输入 */}
@@ -630,6 +719,22 @@ function App() {
                     min="0"
                     step="0.01"
                   />
+                  <input
+                    type="text"
+                    placeholder="#FF0000"
+                    value={newMaterialColor}
+                    onChange={(e) => setNewMaterialColor(e.target.value)}
+                    style={{ width: '80px', padding: '5px' }}
+                    pattern="^#[0-9A-Fa-f]{6}$"
+                    title="请输入6位十六进制颜色值，如：#FF0000"
+                  />
+                  <div style={{
+                    width: '24px',
+                    height: '24px',
+                    backgroundColor: isValidColor(newMaterialColor) ? newMaterialColor : '#cccccc',
+                    border: '1px solid #ccc',
+                    borderRadius: '3px'
+                  }}></div>
                 </div>
                 <div style={{ display: 'flex', gap: '10px' }}>
                   {editingMaterial ? (
@@ -672,9 +777,21 @@ function App() {
                     border: '1px solid #ddd',
                     borderRadius: '3px'
                   }}>
-                    <span>
-                      <strong>{material.name}</strong> - {material.price} 元/m²
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{
+                        width: '20px',
+                        height: '20px',
+                        backgroundColor: material.color,
+                        border: '1px solid #ccc',
+                        borderRadius: '3px'
+                      }}></div>
+                      <span>
+                        <strong>{material.name}</strong> - {material.price} 元/平方米
+                      </span>
+                      <small style={{ color: '#666', fontSize: '11px' }}>
+                        {material.color}
+                      </small>
+                    </div>
                     <div style={{ display: 'flex', gap: '5px' }}>
                       <button
                         onClick={() => editMaterial(material)}
