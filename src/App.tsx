@@ -37,6 +37,7 @@ function App() {
   const [csInterface, setCsInterface] = useState<any>(null);
   const [debugInfo, setDebugInfo] = useState('');
   const [isWaitingForClick, setIsWaitingForClick] = useState(false);
+  const [showDebugInfo, setShowDebugInfo] = useState(false);
 
   // 材质管理相关状态
   const [showMaterialManager, setShowMaterialManager] = useState(false);
@@ -575,35 +576,90 @@ function App() {
       ${jsonPolyfill}
       
       (function() {
+        var debugSteps = [];
         try {
           var doc = app.activeDocument;
-          var selectedItem = doc.selection[0];
-          var bounds = selectedItem.geometricBounds;
+          var selection = doc.selection;
+          var selectedCount = selection.length;
+          
+          debugSteps.push("选择对象数量: " + selectedCount);
           
           // 默认文字框尺寸 (66mm x 42mm 转换为点)
           // 1mm = 2.83465 pt
           var textWidth = 66 * 2.83465; // 约187pt
           var textHeight = 42 * 2.83465; // 约119pt
           
-          // 计算面积
-          var width = Math.abs(bounds[2] - bounds[0]);
-          var height = Math.abs(bounds[1] - bounds[3]);
-
-          // 将点转换为毫米 (1 pt = 0.352778 mm)
-          var widthMm = width * 0.352778 * 10;
-          var heightMm = height * 0.352778 * 10;
+          // 计算所有选中对象的总面积
+          var totalArea = 0;
+          var allBounds = [];
           
-          var areaPoints = width * height;
-          var areaM2 = areaPoints * 0.000000124;
-
-          var areaText = widthMm * heightMm / 10000;
-          var totalPrice = areaText * ${unitPrice};
+          if (selectedCount === 0) {
+            return JSON.stringify({
+              success: false,
+              message: "没有选中任何对象"
+            });
+          }
           
-         
+          for (var i = 0; i < selectedCount; i++) {
+            try {
+              var item = selection[i];
+              if (!item || !item.geometricBounds) {
+                continue; // 跳过无效对象
+              }
+              
+              var bounds = item.geometricBounds;
+              allBounds.push(bounds);
+              
+              var width = Math.abs(bounds[2] - bounds[0]);
+              var height = Math.abs(bounds[1] - bounds[3]);
+              
+              // 将点转换为毫米再转换为平方米
+              var widthMm = width * 0.352778 * 10;
+              var heightMm = height * 0.352778 * 10;
+              var areaM2 = widthMm * heightMm / 10000;
+              
+              totalArea += areaM2;
+            } catch (itemError) {
+              continue;
+            }
+          }
+          
+          if (allBounds.length === 0) {
+            return JSON.stringify({
+              success: false,
+              message: "没有找到有效的对象边界"
+            });
+          }
+          
+          debugSteps.push("总面积: " + totalArea.toFixed(2) + " m²");
+          var totalPrice = totalArea * ${unitPrice};
+          debugSteps.push("总价: " + totalPrice.toFixed(2) + " 元");
+          
+          // 计算所有选中对象的总边界（用于创建线框）
+          var minX = allBounds[0][0];
+          var maxY = allBounds[0][1];
+          var maxX = allBounds[0][2];
+          var minY = allBounds[0][3];
+          
+          for (var i = 1; i < allBounds.length; i++) {
+            minX = Math.min(minX, allBounds[i][0]);
+            maxY = Math.max(maxY, allBounds[i][1]);
+            maxX = Math.max(maxX, allBounds[i][2]);
+            minY = Math.min(minY, allBounds[i][3]);
+          }
+          
+          var bounds = [minX, maxY, maxX, minY]; // 总边界
+          
           // 创建文本标注
+          // 计算总边界的宽高（毫米）
+          var totalWidth = Math.abs(bounds[2] - bounds[0]);
+          var totalHeight = Math.abs(bounds[1] - bounds[3]);
+          var totalWidthMm = totalWidth * 0.352778 * 10;
+          var totalHeightMm = totalHeight * 0.352778 * 10;
+          
           var textContent = "材质: ${selectedMaterial}\\n" +
-                           "宽 * 高: " + widthMm.toFixed(0) + " * " + heightMm.toFixed(0) + " mm\\n" +
-                           "面积: " + areaText.toFixed(2) + " m²\\n" +
+                           "宽 * 高: " + totalWidthMm.toFixed(0) + " * " + totalHeightMm.toFixed(0) + " mm\\n" +
+                           "面积: " + totalArea.toFixed(2) + " m²\\n" +
                            "单价: ${unitPrice} 元/m²\\n" +
                            "总价: " + totalPrice.toFixed(2) + " 元";
           
@@ -620,45 +676,29 @@ function App() {
           // 设置文字属性
           try {
             textFrame.textRange.characterAttributes.size = 20;
-            // 设置文字颜色为材质颜色
             textFrame.textRange.characterAttributes.fillColor = materialColor;
-            // 设置字体为苹方-简
             textFrame.textRange.characterAttributes.textFont = app.textFonts.getByName("PingFangSC-Regular");
+            debugSteps.push("字体: PingFangSC-Regular");
           } catch (e) {
-            // 如果苹方字体不可用，尝试其他常见字体
             try {
               textFrame.textRange.characterAttributes.textFont = app.textFonts.getByName("PingFang SC");
+              debugSteps.push("字体: PingFang SC");
             } catch (e2) {
               try {
                 textFrame.textRange.characterAttributes.textFont = app.textFonts.getByName("Helvetica");
+                debugSteps.push("字体: Helvetica");
               } catch (e3) {
-                // 如果都不行，使用系统默认字体
+                debugSteps.push("字体: 系统默认");
               }
             }
           }
           
           // 创建矩形线框围绕对象
-          var outlineDebugInfo = [];
           var outlineRect = null;
-          var fontUsed = "默认字体";
-          
-          // 检查实际使用的字体
-          try {
-            fontUsed = textFrame.textRange.characterAttributes.textFont.name;
-          } catch (e) {
-            fontUsed = "无法获取字体名称";
-          }
-          
-          outlineDebugInfo.push("使用的字体: " + fontUsed);
-          outlineDebugInfo.push("对象尺寸: " + widthMm.toFixed(1) + " mm × " + heightMm.toFixed(1) + " mm");
-          var margin = 15; // 线框与对象的间距 - 移到外层作用域
+          var margin = 15; // 线框与对象的间距
           var frameLeft, frameTop, frameRight, frameBottom;
           
           try {
-            // 记录对象类型用于调试
-            outlineDebugInfo.push("对象类型: " + selectedItem.typename);
-            outlineDebugInfo.push("对象边界: [" + bounds[0].toFixed(1) + "," + bounds[1].toFixed(1) + "," + bounds[2].toFixed(1) + "," + bounds[3].toFixed(1) + "]");
-            
             // 创建矩形线框
             outlineRect = doc.pathItems.add();
             
@@ -688,16 +728,10 @@ function App() {
             // 确保线框在最上层
             outlineRect.zOrder(ZOrderMethod.BRINGTOFRONT);
             
-            outlineDebugInfo.push("矩形线框创建成功:");
-            outlineDebugInfo.push("  左上角: [" + frameLeft.toFixed(1) + "," + frameTop.toFixed(1) + "]");
-            outlineDebugInfo.push("  右下角: [" + frameRight.toFixed(1) + "," + frameBottom.toFixed(1) + "]");
-            outlineDebugInfo.push("  线框颜色: " + materialColor.red + "," + materialColor.green + "," + materialColor.blue);
-            outlineDebugInfo.push("  线框宽度: " + outlineRect.strokeWidth);
-            outlineDebugInfo.push("  引导线将从线框边缘开始");
+            debugSteps.push("线框创建成功");
             
           } catch (outlineError) {
-            outlineDebugInfo.push("创建矩形线框时出错: " + outlineError.message);
-            outlineDebugInfo.push("错误堆栈: " + (outlineError.stack || "无堆栈信息"));
+            debugSteps.push("线框创建失败: " + outlineError.message);
           }
           
           // 计算从线框边缘到文字标注的引导线起点
@@ -738,8 +772,7 @@ function App() {
             }
           }
           
-          // 添加引导线起点的调试信息
-          outlineDebugInfo.push("引导线起点: [" + startX.toFixed(1) + "," + startY.toFixed(1) + "]");
+          debugSteps.push("引导线创建成功");
           
           // 创建引导线 - 从线框边缘到文字附近，避免重叠
           var guideLine = doc.pathItems.add();
@@ -811,40 +844,50 @@ function App() {
             outlineRect.move(group, ElementPlacement.INSIDE);
           }
           
-          // 添加标签
-          var tag = selectedItem.tags.add();
-          tag.name = "QuoteMaterial";
-          tag.value = JSON.stringify({
-            material: "${selectedMaterial}",
-            unitPrice: ${unitPrice},
-            area: areaM2,
-            totalPrice: totalPrice,
-            color: "${currentMaterial.color}",
-            groupName: group.name,
-            textPosition: [${clickX}, ${clickY}],
-            timestamp: new Date().getTime()
-          });
+          // 为所有选中对象添加标签
+          for (var i = 0; i < selectedCount; i++) {
+            var item = selection[i];
+            var tag = item.tags.add();
+            tag.name = "QuoteMaterial";
+            tag.value = JSON.stringify({
+              material: "${selectedMaterial}",
+              unitPrice: ${unitPrice},
+              area: totalArea,
+              totalPrice: totalPrice,
+              color: "${currentMaterial.color}",
+              groupName: group.name,
+              textPosition: [${clickX}, ${clickY}],
+              timestamp: new Date().getTime(),
+              objectCount: selectedCount,
+              isMultiSelect: selectedCount > 1
+            });
+          }
           
           return JSON.stringify({
             success: true,
             message: "成功应用材质和引导线",
             data: {
               material: "${selectedMaterial}",
-              area: areaM2.toFixed(3),
+              objectCount: selectedCount,
+              area: (totalArea || 0).toFixed(3),
               unitPrice: ${unitPrice},
-              totalPrice: totalPrice.toFixed(2),
+              totalPrice: (totalPrice || 0).toFixed(2),
               color: "${currentMaterial.color}",
-              position: "x:" + ${clickX}.toFixed(1) + ", y:" + ${clickY}.toFixed(1)
+              position: "x:" + ${clickX}.toFixed(1) + ", y:" + ${clickY}.toFixed(1),
+              isMultiSelect: selectedCount > 1
             },
             debug: {
-              outlineInfo: outlineDebugInfo
+              steps: debugSteps
             }
           });
         } catch (error) {
           return JSON.stringify({
             success: false,
             message: "应用材质时发生错误: " + error.message,
-            error: error.toString()
+            debug: {
+              steps: debugSteps,
+              error: error.toString()
+            }
           });
         }
       })();
@@ -862,12 +905,16 @@ function App() {
         const response = JSON.parse(result);
         if (response.success) {
           setMessage(`成功：${response.message}`);
-          // 显示调试信息
-          if (response.debug && response.debug.outlineInfo) {
-            setDebugInfo(response.debug.outlineInfo.join('\n'));
+          // 只在开启调试时显示调试信息
+          if (showDebugInfo && response.debug && response.debug.steps) {
+            setDebugInfo(response.debug.steps.join('\n'));
           }
         } else {
           setMessage(`错误：${response.message}`);
+          // 错误时始终显示调试信息
+          if (response.debug && response.debug.steps) {
+            setDebugInfo(response.debug.steps.join('\n'));
+          }
         }
       } catch (error) {
         setMessage(`应用完成，原始响应: ${result}`);
@@ -1026,8 +1073,20 @@ function App() {
       </div>
 
       <div className="plugin-content">
+        {/* 调试开关 */}
+        <div className="debug-toggle" style={{ marginBottom: '16px' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px' }}>
+            <input
+              type="checkbox"
+              checked={showDebugInfo}
+              onChange={(e) => setShowDebugInfo(e.target.checked)}
+            />
+            显示调试信息
+          </label>
+        </div>
+
         {/* 调试信息 */}
-        {debugInfo && (
+        {showDebugInfo && debugInfo && (
           <div className="debug-info" style={{
             background: '#f0f0f0',
             padding: '8px',
@@ -1090,7 +1149,7 @@ function App() {
           <button
             onClick={() => setShowMaterialManager(!showMaterialManager)}
             className="manage-button"
-            style={{ backgroundColor: '#28a745', marginBottom: '10px' }}
+            style={{ backgroundColor: '#28a745' }}
           >
             {showMaterialManager ? '隐藏材质管理' : '管理材质'}
           </button>
@@ -1220,14 +1279,18 @@ function App() {
 
         {/* 操作按钮 */}
         <div className="button-group">
-          <button
-            onClick={runDebugTest}
-            disabled={isProcessing}
-            className="apply-button"
-            style={{ backgroundColor: '#6c757d' }}
-          >
-            {isProcessing ? '测试中...' : '调试测试'}
-          </button>
+          {
+            showDebugInfo && (
+              <button
+                onClick={runDebugTest}
+                disabled={isProcessing}
+                className="apply-button"
+                style={{ backgroundColor: '#6c757d' }}
+              >
+                {isProcessing ? '测试中...' : '调试测试'}
+              </button>
+            )
+          }
 
           <button
             onClick={applyMaterial}

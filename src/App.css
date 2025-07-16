@@ -40,6 +40,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  margin-bottom: 8px;
 }
 
 .form-group label {
@@ -78,7 +79,6 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin-top: 8px;
 }
 
 .apply-button,
@@ -91,6 +91,7 @@
   cursor: pointer;
   transition: all 0.2s;
   text-align: center;
+  margin-top: 8px;
 }
 
 .apply-button {
@@ -103,12 +104,12 @@
 }
 
 .export-button {
-  background-color: #28a745;
+  background-color: #722ed1;
   color: white;
 }
 
 .export-button:hover:not(:disabled) {
-  background-color: #218838;
+  background-color: #6a0eea;
 }
 
 .apply-button:disabled,
@@ -167,7 +168,7 @@
 
 /* 材质管理相关样式 */
 .material-management {
-  margin-bottom: 20px;
+  /* margin-bottom: 20px; */
 }
 
 .manage-button {
