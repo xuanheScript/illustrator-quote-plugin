@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Illustrator Quote Plugin - 智能安装脚本
+# Illustrator Quote Plugin - 自动版本检测安装脚本
 # 自动检测 Illustrator 版本并安装对应的 CEP 版本
 
-echo "🚀 Illustrator Quote Plugin - 智能安装"
+echo "🚀 Illustrator Quote Plugin - 自动安装"
 echo "🔍 正在检测您的 Illustrator 版本..."
 echo ""
 
@@ -23,27 +23,22 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     if [ -d "$AI_2025_PATH" ]; then
         DETECTED_VERSION="2025"
         RECOMMENDED_CEP="CEP 12"
-        TARGET_BRANCH="main"
         INSTALL_SCRIPT="install.sh"
     elif [ -d "$AI_2024_PATH" ]; then
         DETECTED_VERSION="2024"
         RECOMMENDED_CEP="CEP 10"
-        TARGET_BRANCH="cep10-support"
         INSTALL_SCRIPT="install-cep10.sh"
     elif [ -d "$AI_2023_PATH" ]; then
         DETECTED_VERSION="2023"
         RECOMMENDED_CEP="CEP 10"
-        TARGET_BRANCH="cep10-support"
         INSTALL_SCRIPT="install-cep10.sh"
     elif [ -d "$AI_2022_PATH" ]; then
         DETECTED_VERSION="2022"
         RECOMMENDED_CEP="CEP 10"
-        TARGET_BRANCH="cep10-support"
         INSTALL_SCRIPT="install-cep10.sh"
     elif [ -d "$AI_2021_PATH" ]; then
         DETECTED_VERSION="2021"
         RECOMMENDED_CEP="CEP 10"
-        TARGET_BRANCH="cep10-support"
         INSTALL_SCRIPT="install-cep10.sh"
     else
         echo "❌ 未检测到 Adobe Illustrator 安装"
@@ -56,34 +51,9 @@ elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
     echo "⚠️  Linux 系统无法自动检测 Illustrator 版本"
     echo "请手动选择安装版本"
     
-    echo ""
-    echo "📋 请选择您的 Illustrator 版本:"
-    echo "1) Illustrator 2025+ (CEP 12)"
-    echo "2) Illustrator 2021-2024 (CEP 10)"
-    read -p "请输入选择 (1 或 2): " choice
-    
-    case $choice in
-        1)
-            DETECTED_VERSION="2025+"
-            RECOMMENDED_CEP="CEP 12"
-            TARGET_BRANCH="main"
-            INSTALL_SCRIPT="install.sh"
-            ;;
-        2)
-            DETECTED_VERSION="2021-2024"
-            RECOMMENDED_CEP="CEP 10"
-            TARGET_BRANCH="cep10-support"
-            INSTALL_SCRIPT="install-cep10.sh"
-            ;;
-        *)
-            echo "❌ 无效选择"
-            exit 1
-            ;;
-    esac
-    
 else
     echo "❌ 不支持的操作系统: $OSTYPE"
-    echo "请使用 Windows 批处理文件或手动安装"
+    echo "请使用 Windows 批处理文件 install-auto.bat"
     exit 1
 fi
 
@@ -93,7 +63,6 @@ echo ""
 echo "📋 检测结果:"
 echo "- Illustrator 版本: $DETECTED_VERSION"
 echo "- 推荐 CEP 版本: $RECOMMENDED_CEP"
-echo "- 目标分支: $TARGET_BRANCH"
 echo "- 安装脚本: $INSTALL_SCRIPT"
 echo ""
 
@@ -115,28 +84,6 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo "🚀 开始安装..."
     echo ""
     
-    # 获取当前分支
-    CURRENT_BRANCH=$(git branch --show-current 2>/dev/null)
-    
-    # 如果需要切换分支
-    if [ "$CURRENT_BRANCH" != "$TARGET_BRANCH" ]; then
-        echo "🔄 切换到 $TARGET_BRANCH 分支..."
-        
-        # 检查分支是否存在
-        if git show-ref --verify --quiet refs/heads/$TARGET_BRANCH; then
-            git checkout $TARGET_BRANCH
-        elif git show-ref --verify --quiet refs/remotes/origin/$TARGET_BRANCH; then
-            git checkout -b $TARGET_BRANCH origin/$TARGET_BRANCH
-        else
-            echo "❌ 分支 $TARGET_BRANCH 不存在"
-            echo "请检查仓库是否完整"
-            exit 1
-        fi
-        
-        echo "✅ 已切换到 $TARGET_BRANCH 分支"
-        echo ""
-    fi
-    
     # 确保脚本有执行权限
     chmod +x "$INSTALL_SCRIPT"
     
@@ -154,11 +101,9 @@ else
     echo "📋 手动安装选项:"
     echo ""
     echo "🔹 CEP 12 版本 (Illustrator 2025+):"
-    echo "   git checkout main"
     echo "   ./install.sh"
     echo ""
     echo "🔹 CEP 10 版本 (Illustrator 2021-2024):"
-    echo "   git checkout cep10-support"
     echo "   ./install-cep10.sh"
     echo ""
     echo "💡 提示: 选择与您的 Illustrator 版本匹配的 CEP 版本"

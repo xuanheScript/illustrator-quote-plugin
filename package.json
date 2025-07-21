@@ -1,7 +1,7 @@
 {
   "name": "illustrator-quote-plugin",
   "version": "2.0.0",
-  "description": "Adobe Illustrator CEP 12 plugin for material quoting and pricing - supports Illustrator 2025+",
+  "description": "Adobe Illustrator CEP 12 plugin for material annotation and pricing - supports Illustrator 2025+",
   "private": true,
   "type": "module",
   "scripts": {
@@ -15,9 +15,10 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "package": "yarn build:cep && yarn create-zxp",
-    "create-zxp": "echo 'ZXP packaging requires Adobe Extension Builder or ZXPSignCmd'",
+    "create-zxp": "node scripts/simple-package.cjs",
     "install-debug": "yarn build:cep && yarn copy-to-extensions",
-    "copy-to-extensions": "echo 'Copy dist folder to CEP extensions directory'"
+    "copy-to-extensions": "node scripts/install-debug.cjs",
+    "release": "yarn build:cep && yarn create-zxp"
   },
   "dependencies": {
     "react": "^19.1.0",
@@ -34,7 +35,8 @@
     "globals": "^16.3.0",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.35.1",
-    "vite": "^7.0.4"
+    "vite": "^7.0.4",
+    "zxp-sign-cmd": "^2.0.0"
   },
   "keywords": [
     "adobe",
@@ -44,11 +46,11 @@
     "plugin",
     "extension",
     "material",
-    "quote",
+    "annotation",
     "pricing",
     "illustrator-2025"
   ],
-  "author": "Your Name",
+  "author": "Illustrator Annotation Plugin Team",
   "license": "MIT",
   "engines": {
     "node": ">=17.7.1"
