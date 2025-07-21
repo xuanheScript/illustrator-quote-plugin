@@ -31,7 +31,7 @@ declare global {
 function App() {
   const [materials, setMaterials] = useState<Material[]>([]);
   const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
-  const [unitValue, setUnitValue] = useState('');
+  const [unitValues, setUnitValues] = useState<Record<string, string>>({});
   const [isProcessing, setIsProcessing] = useState(false);
   const [message, setMessage] = useState('');
   const [csInterface, setCsInterface] = useState<unknown>(null);
@@ -241,12 +241,22 @@ function App() {
     if (selectedMaterials.includes(materialName)) {
       // 如果已经选中，则取消选中
       setSelectedMaterials(selectedMaterials.filter(name => name !== materialName));
+      // 同时清除该材质的单位值
+      const newUnitValues = { ...unitValues };
+      delete newUnitValues[materialName];
+      setUnitValues(newUnitValues);
     } else {
       // 如果没有选中，则添加到选中列表
       setSelectedMaterials([...selectedMaterials, materialName]);
     }
-    // 切换材质时清空单位值
-    setUnitValue('');
+  };
+
+  // 处理单个材质的单位值变化
+  const handleUnitValueChange = (materialName: string, value: string) => {
+    setUnitValues({
+      ...unitValues,
+      [materialName]: value
+    });
   };
 
   // 调试功能
@@ -667,7 +677,7 @@ function App() {
           // 生成材质列表文本
           var selectedMaterialNames = JSON.parse('${JSON.stringify(selectedMaterials)}');
           var materialsData = JSON.parse('${JSON.stringify(materials)}');
-          var unitValue = '${unitValue}';
+          var unitValues = JSON.parse('${JSON.stringify(unitValues)}');
           var materialsList = [];
           
           for (var i = 0; i < selectedMaterialNames.length; i++) {
@@ -682,10 +692,13 @@ function App() {
               }
             }
             
+            // 获取该材质的单位值
+            var materialUnitValue = unitValues[materialName] || '';
+            
             // 根据是否有单位值和单位信息生成显示文本
             var displayText;
-            if (unitValue && materialUnit) {
-              displayText = unitValue + " " + materialUnit + " " + materialName;
+            if (materialUnitValue && materialUnit) {
+              displayText = materialUnitValue + " " + materialUnit + " " + materialName;
             } else {
               displayText = materialName;
             }
@@ -900,7 +913,7 @@ function App() {
             tag.name = "QuoteMaterial";
             tag.value = JSON.stringify({
               materials: selectedMaterialNames,
-              unitValue: unitValue,
+              unitValues: unitValues,
               area: totalArea,
               color: firstSelectedMaterial.color,
               groupName: group.name,
@@ -916,7 +929,7 @@ function App() {
             message: "成功应用材质和引导线",
             data: {
               materials: selectedMaterialNames,
-              unitValue: unitValue,
+              unitValues: unitValues,
               objectCount: selectedCount,
               area: (totalArea || 0).toFixed(3),
               color: firstSelectedMaterial.color,
@@ -1007,7 +1020,7 @@ function App() {
                     quotedItems.push({
                       layerName: item.name || "未命名对象",
                       materials: data.materials || [data.material], // 兼容旧数据
-                      unitValue: data.unitValue || '',
+                      unitValues: data.unitValues || { [data.material]: data.unitValue || '' }, // 兼容旧数据
                       area: data.area
                     });
                   } catch (e) {}
@@ -1028,10 +1041,22 @@ function App() {
             
             for (var i = 0; i < quotedItems.length; i++) {
               var item = quotedItems[i];
-              var materialsText = item.materials ? item.materials.join(' + ') : '未知';
+              // 生成带单位值的材质文本
+              var materialsTextArray = [];
+              for (var j = 0; j < item.materials.length; j++) {
+                var materialName = item.materials[j];
+                var unitValue = item.unitValues[materialName] || '';
+                if (unitValue) {
+                  materialsTextArray.push(unitValue + " " + materialName);
+                } else {
+                  materialsTextArray.push(materialName);
+                }
+              }
+              var materialsText = materialsTextArray.join(' + ');
+              
               csvContent += item.layerName + "," + 
                            materialsText + "," + 
-                           (item.unitValue || '') + "," +
+                           "," + // 空的单位值列（因为已包含在材质文本中）
                            item.area.toFixed(3) + "\\n";
             }
             
@@ -1178,22 +1203,63 @@ function App() {
           )}
         </div>
 
-        {/* 单位值输入 */}
-        <div className="form-group">
-          <label htmlFor="unit-value">单位值（可选）：</label>
-          <input
-            id="unit-value"
-            type="text"
-            value={unitValue}
-            onChange={(e) => setUnitValue(e.target.value)}
-            className="unit-input"
-            placeholder="请输入数值，如：12、100等"
-            style={{ width: '100%', padding: '6px 8px', border: '1px solid #ddd', borderRadius: '4px' }}
-          />
-          <small style={{ color: '#666', fontSize: '11px', display: 'block', marginTop: '4px' }}>
-            输入数值后，将与材质的默认单位组合显示，如：12 cm 亚克力
-          </small>
-        </div>
+        {/* 选中材质的单位值输入 */}
+        {selectedMaterials.length > 0 && (
+          <div className="form-group">
+            <label>为选中材质设置数值：</label>
+            <div style={{ marginTop: '8px' }}>
+              {selectedMaterials.map(materialName => {
+                const material = materials.find(m => m.name === materialName);
+                return (
+                  <div key={materialName} style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '10px', 
+                    marginBottom: '8px',
+                    padding: '8px',
+                    backgroundColor: '#f8f9fa',
+                    borderRadius: '4px'
+                  }}>
+                    <div style={{
+                      width: '16px',
+                      height: '16px',
+                      backgroundColor: material?.color,
+                      border: '1px solid #ccc',
+                      borderRadius: '3px'
+                    }}></div>
+                    <span style={{ minWidth: '80px', fontSize: '14px' }}>{materialName}</span>
+                    {material?.unit && (
+                      <>
+                        <input
+                          type="text"
+                          value={unitValues[materialName] || ''}
+                          onChange={(e) => handleUnitValueChange(materialName, e.target.value)}
+                          placeholder="数值"
+                          style={{ 
+                            width: '80px', 
+                            padding: '4px 6px', 
+                            border: '1px solid #ddd', 
+                            borderRadius: '3px',
+                            fontSize: '13px'
+                          }}
+                        />
+                        <span style={{ fontSize: '13px', color: '#666' }}>{material.unit}</span>
+                      </>
+                    )}
+                    {!material?.unit && (
+                      <span style={{ fontSize: '12px', color: '#999', fontStyle: 'italic' }}>
+                        （未设置单位）
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            <small style={{ color: '#666', fontSize: '11px', display: 'block', marginTop: '4px' }}>
+              为有单位的材质输入数值，将显示为：数值 单位 材质名
+            </small>
+          </div>
+        )}
 
 
         {/* 材质管理 */}
