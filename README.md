@@ -2,8 +2,6 @@
 
 <div align="center">
 
-![Plugin Logo](icons/icon.png)
-
 **一个专业的 Adobe Illustrator 材质标注插件，支持 CEP 12 和 Illustrator 2025+**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -51,17 +49,17 @@
 ## 📸 插件预览
 
 ### 主界面
-![插件主界面](images/PluginView.png)
+<img src="images/PluginView.png" alt="插件主界面" width="400"/>
 
 *主界面展示了材质选择、单位设置和应用功能*
 
 ### 材质管理
-![材质管理界面](images/PluginDetailedView.png)
+<img src="images/PluginDetailedView.png" alt="材质管理界面" width="400"/>
 
 *材质管理界面支持添加、编辑和删除材质，设置默认单位和颜色*
 
 ### 实际应用效果
-![应用效果示例](images/ExampleView.png)
+<img src="images/ExampleView.png" alt="应用效果示例" width="400"/>
 
 *在Illustrator中的实际应用效果，显示多材质标注和尺寸信息*
 
