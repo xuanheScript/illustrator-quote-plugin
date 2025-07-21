@@ -5,17 +5,17 @@ import './App.css'
 interface Material {
   id: string;
   name: string;
-  price: number;
   color: string;
+  unit?: string;
 }
 
 // 默认材质数据
 const DEFAULT_MATERIALS: Material[] = [
-  { id: '1', name: '亚克力板', price: 120, color: '#eb2f96' },
-  { id: '2', name: 'PVC板', price: 80, color: '#52c41a' },
-  { id: '3', name: '铝塑板', price: 150, color: '#fa8c16' },
-  { id: '4', name: '不锈钢板', price: 200, color: '#f5222d' },
-  { id: '5', name: '木质板', price: 100, color: '#722ed1' }
+  { id: '1', name: '亚克力', color: '#eb2f96' },
+  { id: '2', name: 'PVC', color: '#52c41a' },
+  { id: '3', name: '宣绒布', color: '#fa8c16' },
+  { id: '4', name: '不锈钢', color: '#f5222d' },
+  { id: '5', name: '木塑', color: '#722ed1' }
 ];
 
 // 本地存储键名
@@ -24,17 +24,17 @@ const STORAGE_KEY = 'illustrator-quote-materials';
 // 扩展 Window 接口
 declare global {
   interface Window {
-    CSInterface: any;
+    CSInterface: unknown;
   }
 }
 
 function App() {
   const [materials, setMaterials] = useState<Material[]>([]);
-  const [selectedMaterial, setSelectedMaterial] = useState('');
-  const [unitPrice, setUnitPrice] = useState(0);
+  const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
+  const [unitValue, setUnitValue] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [message, setMessage] = useState('');
-  const [csInterface, setCsInterface] = useState<any>(null);
+  const [csInterface, setCsInterface] = useState<unknown>(null);
   const [debugInfo, setDebugInfo] = useState('');
   const [isWaitingForClick, setIsWaitingForClick] = useState(false);
   const [showDebugInfo, setShowDebugInfo] = useState(false);
@@ -43,8 +43,8 @@ function App() {
   const [showMaterialManager, setShowMaterialManager] = useState(false);
   const [editingMaterial, setEditingMaterial] = useState<Material | null>(null);
   const [newMaterialName, setNewMaterialName] = useState('');
-  const [newMaterialPrice, setNewMaterialPrice] = useState(0);
   const [newMaterialColor, setNewMaterialColor] = useState('#0066CC');
+  const [newMaterialUnit, setNewMaterialUnit] = useState('');
 
   // 颜色验证函数
   const isValidColor = (color: string): boolean => {
@@ -93,21 +93,18 @@ function App() {
         const parsedMaterials = JSON.parse(stored);
         setMaterials(parsedMaterials);
         if (parsedMaterials.length > 0) {
-          setSelectedMaterial(parsedMaterials[0].name);
-          setUnitPrice(parsedMaterials[0].price);
+          setSelectedMaterials([parsedMaterials[0].name]);
         }
       } else {
         // 首次使用，设置默认材质
         setMaterials(DEFAULT_MATERIALS);
-        setSelectedMaterial(DEFAULT_MATERIALS[0].name);
-        setUnitPrice(DEFAULT_MATERIALS[0].price);
+        setSelectedMaterials([DEFAULT_MATERIALS[0].name]);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_MATERIALS));
       }
     } catch (error) {
       console.error('加载材质数据失败:', error);
       setMaterials(DEFAULT_MATERIALS);
-      setSelectedMaterial(DEFAULT_MATERIALS[0].name);
-      setUnitPrice(DEFAULT_MATERIALS[0].price);
+      setSelectedMaterials([DEFAULT_MATERIALS[0].name]);
     }
   };
 
@@ -123,8 +120,8 @@ function App() {
 
   // 添加材质
   const addMaterial = () => {
-    if (!newMaterialName.trim() || newMaterialPrice <= 0) {
-      alert('请输入有效的材质名称和价格');
+    if (!newMaterialName.trim()) {
+      alert('请输入有效的材质名称');
       return;
     }
 
@@ -136,29 +133,29 @@ function App() {
     const newMaterial: Material = {
       id: Date.now().toString(),
       name: newMaterialName.trim(),
-      price: newMaterialPrice,
-      color: newMaterialColor
+      color: newMaterialColor,
+      unit: newMaterialUnit.trim() || undefined
     };
 
     const updatedMaterials = [...materials, newMaterial];
     saveMaterials(updatedMaterials);
     setNewMaterialName('');
-    setNewMaterialPrice(0);
     setNewMaterialColor('#0066CC');
+    setNewMaterialUnit('');
   };
 
   // 编辑材质
   const editMaterial = (material: Material) => {
     setEditingMaterial(material);
     setNewMaterialName(material.name);
-    setNewMaterialPrice(material.price);
     setNewMaterialColor(material.color);
+    setNewMaterialUnit(material.unit || '');
   };
 
   // 保存编辑的材质
   const saveEditedMaterial = () => {
-    if (!editingMaterial || !newMaterialName.trim() || newMaterialPrice <= 0) {
-      alert('请输入有效的材质名称和价格');
+    if (!editingMaterial || !newMaterialName.trim()) {
+      alert('请输入有效的材质名称');
       return;
     }
 
@@ -169,22 +166,24 @@ function App() {
 
     const updatedMaterials = materials.map(material =>
       material.id === editingMaterial.id
-        ? { ...material, name: newMaterialName.trim(), price: newMaterialPrice, color: newMaterialColor }
+        ? { ...material, name: newMaterialName.trim(), color: newMaterialColor, unit: newMaterialUnit.trim() || undefined }
         : material
     );
 
     saveMaterials(updatedMaterials);
 
     // 如果编辑的是当前选中的材质，更新选中状态
-    if (selectedMaterial === editingMaterial.name) {
-      setSelectedMaterial(newMaterialName.trim());
-      setUnitPrice(newMaterialPrice);
+    if (selectedMaterials.includes(editingMaterial.name)) {
+      const newSelectedMaterials = selectedMaterials.map(name =>
+        name === editingMaterial.name ? newMaterialName.trim() : name
+      );
+      setSelectedMaterials(newSelectedMaterials);
     }
 
     setEditingMaterial(null);
     setNewMaterialName('');
-    setNewMaterialPrice(0);
     setNewMaterialColor('#0066CC');
+    setNewMaterialUnit('');
   };
 
   // 删除材质
@@ -199,10 +198,14 @@ function App() {
       const updatedMaterials = materials.filter(material => material.id !== materialId);
       saveMaterials(updatedMaterials);
 
-      // 如果删除的是当前选中的材质，切换到第一个材质
-      if (materialToDelete && selectedMaterial === materialToDelete.name) {
-        setSelectedMaterial(updatedMaterials[0].name);
-        setUnitPrice(updatedMaterials[0].price);
+      // 如果删除的是当前选中的材质，从选中列表中移除
+      if (materialToDelete && selectedMaterials.includes(materialToDelete.name)) {
+        const newSelectedMaterials = selectedMaterials.filter(name => name !== materialToDelete.name);
+        if (newSelectedMaterials.length === 0) {
+          setSelectedMaterials([updatedMaterials[0].name]);
+        } else {
+          setSelectedMaterials(newSelectedMaterials);
+        }
       }
     }
   };
@@ -211,8 +214,8 @@ function App() {
   const cancelEdit = () => {
     setEditingMaterial(null);
     setNewMaterialName('');
-    setNewMaterialPrice(0);
     setNewMaterialColor('#0066CC');
+    setNewMaterialUnit('');
   };
 
   useEffect(() => {
@@ -220,11 +223,13 @@ function App() {
 
     // 初始化 CSInterface
     if (window.CSInterface) {
-      const cs = new window.CSInterface();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const cs = new (window.CSInterface as any)();
       setCsInterface(cs);
       console.log('CSInterface initialized');
       setMessage('插件已初始化，可以开始使用');
-      cs.evalScript('$.writeln("脚本加载成功")');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (cs as any).evalScript('$.writeln("脚本加载成功")');
     } else {
       console.error('CSInterface not found');
       setMessage('错误：CSInterface 未找到');
@@ -233,11 +238,15 @@ function App() {
 
   // 处理材质选择变化
   const handleMaterialChange = (materialName: string) => {
-    setSelectedMaterial(materialName);
-    const material = materials.find(m => m.name === materialName);
-    if (material) {
-      setUnitPrice(material.price);
+    if (selectedMaterials.includes(materialName)) {
+      // 如果已经选中，则取消选中
+      setSelectedMaterials(selectedMaterials.filter(name => name !== materialName));
+    } else {
+      // 如果没有选中，则添加到选中列表
+      setSelectedMaterials([...selectedMaterials, materialName]);
     }
+    // 切换材质时清空单位值
+    setUnitValue('');
   };
 
   // 调试功能
@@ -279,7 +288,8 @@ function App() {
 
     console.log('Running debug test');
 
-    csInterface.evalScript(script, (result: string) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (csInterface as any).evalScript(script, (result: string) => {
       setIsProcessing(false);
       console.log('Debug result:', result);
 
@@ -315,9 +325,8 @@ function App() {
       return;
     }
 
-    const currentMaterial = materials.find(m => m.name === selectedMaterial);
-    if (!currentMaterial) {
-      setMessage('错误：未找到选中的材质');
+    if (selectedMaterials.length === 0) {
+      setMessage('错误：请选择至少一个材质');
       return;
     }
 
@@ -355,7 +364,8 @@ function App() {
       })();
     `;
 
-    csInterface.evalScript(checkSelectionScript, (result: string) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (csInterface as any).evalScript(checkSelectionScript, (result: string) => {
       setIsProcessing(false);
 
       if (!result || typeof result !== 'string') {
@@ -374,7 +384,7 @@ function App() {
         } else {
           setMessage(`错误：${response.message}`);
         }
-      } catch (error) {
+      } catch {
         setMessage(`检查完成，原始响应: ${result}`);
       }
     });
@@ -384,8 +394,7 @@ function App() {
   const startClickListening = () => {
     if (!csInterface) return;
 
-    const currentMaterial = materials.find(m => m.name === selectedMaterial);
-    if (!currentMaterial) return;
+    if (selectedMaterials.length === 0) return;
 
     const clickListenerScript = `
       ${jsonPolyfill}
@@ -538,7 +547,8 @@ function App() {
     setIsProcessing(true);
     setMessage('等待用户选择位置...');
 
-    csInterface.evalScript(clickListenerScript, (result: string) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (csInterface as any).evalScript(clickListenerScript, (result: string) => {
       setIsWaitingForClick(false);
 
       if (!result || typeof result !== 'string') {
@@ -556,7 +566,7 @@ function App() {
           setIsProcessing(false);
           setMessage(`操作取消：${response.message}`);
         }
-      } catch (error) {
+      } catch {
         setIsProcessing(false);
         setMessage(`获取位置完成，原始响应: ${result}`);
       }
@@ -567,8 +577,7 @@ function App() {
   const applyMaterialAtPosition = (clickX: number, clickY: number) => {
     if (!csInterface) return;
 
-    const currentMaterial = materials.find(m => m.name === selectedMaterial);
-    if (!currentMaterial) return;
+    if (selectedMaterials.length === 0) return;
 
     setMessage('正在应用材质...');
 
@@ -632,8 +641,6 @@ function App() {
           }
           
           debugSteps.push("总面积: " + totalArea.toFixed(2) + " m²");
-          var totalPrice = totalArea * ${unitPrice};
-          debugSteps.push("总价: " + totalPrice.toFixed(2) + " 元");
           
           // 计算所有选中对象的总边界（用于创建线框）
           var minX = allBounds[0][0];
@@ -657,17 +664,30 @@ function App() {
           var totalWidthMm = totalWidth * 0.352778 * 10;
           var totalHeightMm = totalHeight * 0.352778 * 10;
           
-          var textContent = "材质: ${selectedMaterial}\\n" +
-                           "宽 * 高: " + totalWidthMm.toFixed(0) + " * " + totalHeightMm.toFixed(0) + " mm\\n" +
-                           "面积: " + totalArea.toFixed(2) + " m²\\n" +
-                           "单价: ${unitPrice} 元/m²\\n" +
-                           "总价: " + totalPrice.toFixed(2) + " 元";
+          // 生成材质列表文本
+          var selectedMaterialNames = JSON.parse('${JSON.stringify(selectedMaterials)}');
+          var unitValue = '${unitValue}';
+          var materialsList = [];
           
-          // 创建RGB颜色
+          for (var i = 0; i < selectedMaterialNames.length; i++) {
+            var materialName = selectedMaterialNames[i];
+            var displayText = unitValue ? ("[" + unitValue + "] " + "材质:" + materialName) : ("材质:" + materialName);
+            materialsList.push(displayText);
+          }
+          
+          var materialsText = materialsList.join(" + ");
+          
+          var textContent = materialsText + "\\n" +
+                           "宽 * 高: " + totalWidthMm.toFixed(0) + " * " + totalHeightMm.toFixed(0) + " mm\\n" +
+                           "面积: " + totalArea.toFixed(2) + " m²";
+          
+          // 创建RGB颜色（使用第一个材质的颜色）
+          var materialsData = JSON.parse('${JSON.stringify(materials)}');
+          var firstSelectedMaterial = materialsData.find(function(m) { return m.name === selectedMaterialNames[0]; });
           var materialColor = new RGBColor();
-          materialColor.red = parseInt("${currentMaterial.color}".substr(1, 2), 16);
-          materialColor.green = parseInt("${currentMaterial.color}".substr(3, 2), 16);
-          materialColor.blue = parseInt("${currentMaterial.color}".substr(5, 2), 16);
+          materialColor.red = parseInt(firstSelectedMaterial.color.substr(1, 2), 16);
+          materialColor.green = parseInt(firstSelectedMaterial.color.substr(3, 2), 16);
+          materialColor.blue = parseInt(firstSelectedMaterial.color.substr(5, 2), 16);
           
           var textFrame = doc.textFrames.add();
           textFrame.contents = textContent;
@@ -695,7 +715,7 @@ function App() {
           
           // 创建矩形线框围绕对象
           var outlineRect = null;
-          var margin = 15; // 线框与对象的间距
+          var margin = 7; // 线框与对象的间距
           var frameLeft, frameTop, frameRight, frameBottom;
           
           try {
@@ -832,7 +852,7 @@ function App() {
           
           // 创建分组
           var group = doc.groupItems.add();
-          group.name = "Quote_${selectedMaterial}_" + new Date().getTime();
+          group.name = "Quote_" + selectedMaterialNames.join("_") + "_" + new Date().getTime();
           
           // 将元素添加到分组
           textFrame.move(group, ElementPlacement.INSIDE);
@@ -850,11 +870,10 @@ function App() {
             var tag = item.tags.add();
             tag.name = "QuoteMaterial";
             tag.value = JSON.stringify({
-              material: "${selectedMaterial}",
-              unitPrice: ${unitPrice},
+              materials: selectedMaterialNames,
+              unitValue: unitValue,
               area: totalArea,
-              totalPrice: totalPrice,
-              color: "${currentMaterial.color}",
+              color: firstSelectedMaterial.color,
               groupName: group.name,
               textPosition: [${clickX}, ${clickY}],
               timestamp: new Date().getTime(),
@@ -867,12 +886,11 @@ function App() {
             success: true,
             message: "成功应用材质和引导线",
             data: {
-              material: "${selectedMaterial}",
+              materials: selectedMaterialNames,
+              unitValue: unitValue,
               objectCount: selectedCount,
               area: (totalArea || 0).toFixed(3),
-              unitPrice: ${unitPrice},
-              totalPrice: (totalPrice || 0).toFixed(2),
-              color: "${currentMaterial.color}",
+              color: firstSelectedMaterial.color,
               position: "x:" + ${clickX}.toFixed(1) + ", y:" + ${clickY}.toFixed(1),
               isMultiSelect: selectedCount > 1
             },
@@ -893,7 +911,8 @@ function App() {
       })();
     `;
 
-    csInterface.evalScript(script, (result: string) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (csInterface as any).evalScript(script, (result: string) => {
       setIsProcessing(false);
 
       if (!result || typeof result !== 'string') {
@@ -916,7 +935,7 @@ function App() {
             setDebugInfo(response.debug.steps.join('\n'));
           }
         }
-      } catch (error) {
+      } catch {
         setMessage(`应用完成，原始响应: ${result}`);
       }
     });
@@ -958,10 +977,9 @@ function App() {
                     var data = JSON.parse(tag.value);
                     quotedItems.push({
                       layerName: item.name || "未命名对象",
-                      material: data.material,
-                      area: data.area,
-                      unitPrice: data.unitPrice,
-                      totalPrice: data.totalPrice
+                      materials: data.materials || [data.material], // 兼容旧数据
+                      unitValue: data.unitValue || '',
+                      area: data.area
                     });
                   } catch (e) {}
                   break;
@@ -977,20 +995,18 @@ function App() {
             });
           } else {
             // 生成CSV内容
-            var csvContent = "图层,材质,面积(m²),单价(元/m²),总价(元)\\n";
-            var totalAmount = 0;
+            var csvContent = "图层,材质,单位值,面积(m²)\\n";
             
             for (var i = 0; i < quotedItems.length; i++) {
               var item = quotedItems[i];
+              var materialsText = item.materials ? item.materials.join(' + ') : '未知';
               csvContent += item.layerName + "," + 
-                           item.material + "," + 
-                           item.area.toFixed(3) + "," + 
-                           item.unitPrice + "," + 
-                           item.totalPrice.toFixed(2) + "\\n";
-              totalAmount += parseFloat(item.totalPrice);
+                           materialsText + "," + 
+                           (item.unitValue || '') + "," +
+                           item.area.toFixed(3) + "\\n";
             }
             
-            csvContent += "\\n总计," + quotedItems.length + "项,,,," + totalAmount.toFixed(2);
+            csvContent += "\\n总计," + quotedItems.length + "项,,";
             
             // 生成文件名
             var now = new Date();
@@ -1016,7 +1032,6 @@ function App() {
                 message: "报价单已导出到桌面: " + fileName,
                 data: {
                   itemCount: quotedItems.length,
-                  totalAmount: totalAmount.toFixed(2),
                   filePath: filePath
                 }
               });
@@ -1040,7 +1055,8 @@ function App() {
 
     console.log('Exporting quote');
 
-    csInterface.evalScript(script, (result: string) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (csInterface as any).evalScript(script, (result: string) => {
       setIsProcessing(false);
       console.log('Export result:', result);
 
@@ -1102,47 +1118,54 @@ function App() {
 
         {/* 材质选择 */}
         <div className="form-group">
-          <label htmlFor="material-select">材质类型：</label>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <select
-              id="material-select"
-              value={selectedMaterial}
-              onChange={(e) => handleMaterialChange(e.target.value)}
-              className="material-select"
-              style={{ flex: 1 }}
-            >
-              {materials.map(material => (
-                <option key={material.id} value={material.name}>
-                  {material.name}
-                </option>
-              ))}
-            </select>
-            <div style={{
-              width: '24px',
-              height: '24px',
-              backgroundColor: materials.find(m => m.name === selectedMaterial)?.color || '#000000',
-              border: '1px solid #ccc',
-              borderRadius: '3px'
-            }}></div>
-            <small style={{ color: '#666', fontSize: '11px' }}>
-              {materials.find(m => m.name === selectedMaterial)?.color || '#000000'}
-            </small>
+          <label>材质类型（可多选）：</label>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '8px' }}>
+            {materials.map(material => (
+              <div key={material.id} style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 12px',
+                border: selectedMaterials.includes(material.name) ? '2px solid #007bff' : '1px solid #ddd',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                backgroundColor: selectedMaterials.includes(material.name) ? '#e3f2fd' : 'white'
+              }} onClick={() => handleMaterialChange(material.name)}>
+                <div style={{
+                  width: '16px',
+                  height: '16px',
+                  backgroundColor: material.color,
+                  border: '1px solid #ccc',
+                  borderRadius: '3px'
+                }}></div>
+                <span style={{ fontSize: '14px' }}>{material.name}</span>
+              </div>
+            ))}
           </div>
+          {selectedMaterials.length > 0 && (
+            <div style={{ marginTop: '8px', fontSize: '12px', color: '#666' }}>
+              已选择：{selectedMaterials.join(', ')}
+            </div>
+          )}
         </div>
 
-        {/* 单价输入 */}
+        {/* 单位值输入 */}
         <div className="form-group">
-          <label htmlFor="unit-price">单价（元/m²）：</label>
+          <label htmlFor="unit-value">单位值（可选）：</label>
           <input
-            id="unit-price"
-            type="number"
-            value={unitPrice}
-            onChange={(e) => setUnitPrice(Number(e.target.value))}
-            className="price-input"
-            min="0"
-            step="0.01"
+            id="unit-value"
+            type="text"
+            value={unitValue}
+            onChange={(e) => setUnitValue(e.target.value)}
+            className="unit-input"
+            placeholder="例如：100个、50m²等"
+            style={{ width: '100%', padding: '6px 8px', border: '1px solid #ddd', borderRadius: '4px' }}
           />
+          <small style={{ color: '#666', fontSize: '11px', display: 'block', marginTop: '4px' }}>
+            如果输入了单位值，将在材质前显示为：[单位值] 材质:材质名
+          </small>
         </div>
+
 
         {/* 材质管理 */}
         <div className="material-management">
@@ -1175,13 +1198,11 @@ function App() {
                     style={{ flex: 1, padding: '5px' }}
                   />
                   <input
-                    type="number"
-                    placeholder="单价"
-                    value={newMaterialPrice || ''}
-                    onChange={(e) => setNewMaterialPrice(Number(e.target.value))}
-                    style={{ width: '100px', padding: '5px' }}
-                    min="0"
-                    step="0.01"
+                    type="text"
+                    placeholder="默认单位（可选）"
+                    value={newMaterialUnit}
+                    onChange={(e) => setNewMaterialUnit(e.target.value)}
+                    style={{ width: '120px', padding: '5px' }}
                   />
                   <input
                     type="text"
@@ -1237,7 +1258,7 @@ function App() {
                     alignItems: 'center',
                     padding: '8px',
                     marginBottom: '5px',
-                    backgroundColor: selectedMaterial === material.name ? '#e3f2fd' : 'white',
+                    backgroundColor: selectedMaterials.includes(material.name) ? '#e3f2fd' : 'white',
                     border: '1px solid #ddd',
                     borderRadius: '3px'
                   }}>
@@ -1250,7 +1271,7 @@ function App() {
                         borderRadius: '3px'
                       }}></div>
                       <span>
-                        <strong>{material.name}</strong> - {material.price} 元/平方米
+                        <strong>{material.name}</strong>{material.unit ? ` (默认单位: ${material.unit})` : ''}
                       </span>
                       <small style={{ color: '#666', fontSize: '11px' }}>
                         {material.color}
