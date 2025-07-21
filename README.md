@@ -11,7 +11,7 @@
 [![Illustrator](https://img.shields.io/badge/Illustrator-2021--2024-orange.svg)](https://www.adobe.com/products/illustrator.html)
 [![Node.js](https://img.shields.io/badge/Node.js-16.14.0%2B-green.svg)](https://nodejs.org/)
 
-[功能特性](#功能特性) • [安装方法](#安装方法) • [使用教程](#使用教程) • [开发指南](#开发指南) • [故障排除](#故障排除)
+[功能特性](#功能特性) • [插件预览](#插件预览) • [安装方法](#安装方法) • [使用教程](#使用教程) • [开发指南](#开发指南) • [故障排除](#故障排除)
 
 </div>
 
@@ -47,6 +47,23 @@
 | 木塑 | 🟣 | 自然质感，环保材质 |
 
 > 💡 **提示**：所有材质都可以通过材质管理功能进行自定义修改，可设置默认单位
+
+## 📸 插件预览
+
+### 主界面
+![插件主界面](images/PluginView.png)
+
+*主界面展示了材质选择、单位设置和应用功能*
+
+### 材质管理
+![材质管理界面](images/PluginDetailedView.png)
+
+*材质管理界面支持添加、编辑和删除材质，设置默认单位和颜色*
+
+### 实际应用效果
+![应用效果示例](images/ExampleView.png)
+
+*在Illustrator中的实际应用效果，显示多材质标注和尺寸信息*
 
 ## 🛠️ 系统要求
 
