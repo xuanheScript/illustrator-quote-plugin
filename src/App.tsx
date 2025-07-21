@@ -683,7 +683,18 @@ function App() {
           
           // 创建RGB颜色（使用第一个材质的颜色）
           var materialsData = JSON.parse('${JSON.stringify(materials)}');
-          var firstSelectedMaterial = materialsData.find(function(m) { return m.name === selectedMaterialNames[0]; });
+          var firstSelectedMaterial = null;
+          for (var j = 0; j < materialsData.length; j++) {
+            if (materialsData[j].name === selectedMaterialNames[0]) {
+              firstSelectedMaterial = materialsData[j];
+              break;
+            }
+          }
+          
+          if (!firstSelectedMaterial) {
+            firstSelectedMaterial = materialsData[0]; // 使用第一个材质作为默认
+          }
+          
           var materialColor = new RGBColor();
           materialColor.red = parseInt(firstSelectedMaterial.color.substr(1, 2), 16);
           materialColor.green = parseInt(firstSelectedMaterial.color.substr(3, 2), 16);
