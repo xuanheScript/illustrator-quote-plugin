@@ -894,7 +894,7 @@ function App() {
           
           // 创建分组
           var group = doc.groupItems.add();
-          group.name = "Quote_" + selectedMaterialNames.join("_") + "_" + new Date().getTime();
+          group.name = "Annotation_" + selectedMaterialNames.join("_") + "_" + new Date().getTime();
           
           // 将元素添加到分组
           textFrame.move(group, ElementPlacement.INSIDE);
@@ -910,7 +910,7 @@ function App() {
           for (var i = 0; i < selectedCount; i++) {
             var item = selection[i];
             var tag = item.tags.add();
-            tag.name = "QuoteMaterial";
+            tag.name = "AnnotationMaterial";
             tag.value = JSON.stringify({
               materials: selectedMaterialNames,
               unitValues: unitValues,
@@ -983,15 +983,15 @@ function App() {
     });
   };
 
-  // 导出报价功能（简化版）
-  const exportQuote = () => {
+  // 导出标注功能（简化版）
+  const exportAnnotation = () => {
     if (!csInterface) {
       setMessage('错误：CSInterface 未初始化');
       return;
     }
 
     setIsProcessing(true);
-    setMessage('正在导出报价...');
+    setMessage('正在导出标注...');
 
     const script = `
       ${jsonPolyfill}
@@ -1014,13 +1014,22 @@ function App() {
               var item = layer.pageItems[itemIndex];
               for (var tagIndex = 0; tagIndex < item.tags.length; tagIndex++) {
                 var tag = item.tags[tagIndex];
-                if (tag.name === "QuoteMaterial") {
+                if (tag.name === "AnnotationMaterial") {
                   try {
                     var data = JSON.parse(tag.value);
+                    // 兼容旧数据格式
+                    var unitValues = data.unitValues;
+                    if (!unitValues && data.material && data.unitValue) {
+                      unitValues = {};
+                      unitValues[data.material] = data.unitValue;
+                    } else if (!unitValues) {
+                      unitValues = {};
+                    }
+                    
                     quotedItems.push({
                       layerName: item.name || "未命名对象",
                       materials: data.materials || [data.material], // 兼容旧数据
-                      unitValues: data.unitValues || { [data.material]: data.unitValue || '' }, // 兼容旧数据
+                      unitValues: unitValues,
                       area: data.area
                     });
                   } catch (e) {}
@@ -1033,7 +1042,7 @@ function App() {
           if (quotedItems.length === 0) {
             return JSON.stringify({
               success: false,
-              message: "未找到任何已应用材质的对象"
+              message: "未找到任何已标注的对象"
             });
           } else {
             // 生成CSV内容
@@ -1070,7 +1079,7 @@ function App() {
             var hour = (now.getHours() < 10 ? "0" : "") + now.getHours();
             var minute = (now.getMinutes() < 10 ? "0" : "") + now.getMinutes();
             
-            var fileName = "报价单_" + year + month + day + "_" + hour + minute + ".csv";
+            var fileName = "标注单_" + year + month + day + "_" + hour + minute + ".csv";
             var filePath = Folder.desktop + "/" + fileName;
             
             // 写入文件
@@ -1083,7 +1092,7 @@ function App() {
               
               return JSON.stringify({
                 success: true,
-                message: "报价单已导出到桌面: " + fileName,
+                message: "标注单已导出到桌面: " + fileName,
                 data: {
                   itemCount: quotedItems.length,
                   filePath: filePath
@@ -1100,7 +1109,7 @@ function App() {
       } catch (error) {
         return JSON.stringify({
           success: false,
-          message: "导出报价时发生错误: " + error.message,
+          message: "导出标注时发生错误: " + error.message,
           error: error.toString()
         });
       }
@@ -1138,7 +1147,7 @@ function App() {
   return (
     <div className="plugin-container">
       <div className="plugin-header">
-        <h2>Illustrator 报价插件</h2>
+        <h2>Illustrator 标注插件</h2>
         <p>选择材质并应用到选中的对象</p>
       </div>
 
@@ -1421,11 +1430,11 @@ function App() {
           </button>
 
           <button
-            onClick={exportQuote}
+            onClick={exportAnnotation}
             disabled={isProcessing}
             className="export-button"
           >
-            {isProcessing ? '导出中...' : '导出报价'}
+            {isProcessing ? '导出中...' : '导出标注'}
           </button>
         </div>
 
@@ -1444,7 +1453,7 @@ function App() {
             <li>在 Illustrator 中选择要应用材质的对象</li>
             <li>选择材质类型和输入数值</li>
             <li>点击"应用材质"按钮</li>
-            <li>完成后点击"导出报价"生成 CSV 文件到桌面</li>
+            <li>完成后点击"导出标注"生成 CSV 文件到桌面</li>
           </ol>
         </div>
       </div>
