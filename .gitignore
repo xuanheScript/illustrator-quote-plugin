@@ -137,3 +137,11 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# CEP Plugin Build Files
+# Build output is committed, but release files are ignored
+release/
+*.zxp
+
+# Local development settings
+.claude/settings.local.json
