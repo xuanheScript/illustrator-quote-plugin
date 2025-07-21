@@ -696,7 +696,7 @@ function App() {
             var materialUnitValue = unitValues[materialName] || '';
             
             // 根据是否有单位值和单位信息生成显示文本
-            var displayText;
+            var displayText = "材质: ";
             if (materialUnitValue && materialUnit) {
               displayText = materialUnitValue + " " + materialUnit + " " + materialName;
             } else {
@@ -1046,17 +1046,30 @@ function App() {
             });
           } else {
             // 生成CSV内容
-            var csvContent = "图层,材质,单位值,面积(m²)\\n";
+            var csvContent = "图层,材质信息,面积(m²)\\n";
             
             for (var i = 0; i < quotedItems.length; i++) {
               var item = quotedItems[i];
-              // 生成带单位值的材质文本
+              // 生成带单位值的材质文本，需要获取材质的单位信息
               var materialsTextArray = [];
+              var materialsData = JSON.parse('${JSON.stringify(materials)}');
+              
               for (var j = 0; j < item.materials.length; j++) {
                 var materialName = item.materials[j];
                 var unitValue = item.unitValues[materialName] || '';
-                if (unitValue) {
-                  materialsTextArray.push(unitValue + " " + materialName);
+                
+                // 查找材质的单位信息
+                var materialUnit = '';
+                for (var k = 0; k < materialsData.length; k++) {
+                  if (materialsData[k].name === materialName && materialsData[k].unit) {
+                    materialUnit = materialsData[k].unit;
+                    break;
+                  }
+                }
+                
+                // 格式化材质文本
+                if (unitValue && materialUnit) {
+                  materialsTextArray.push(unitValue + " " + materialUnit + " " + materialName);
                 } else {
                   materialsTextArray.push(materialName);
                 }
@@ -1065,11 +1078,10 @@ function App() {
               
               csvContent += item.layerName + "," + 
                            materialsText + "," + 
-                           "," + // 空的单位值列（因为已包含在材质文本中）
                            item.area.toFixed(3) + "\\n";
             }
             
-            csvContent += "\\n总计," + quotedItems.length + "项,,";
+            csvContent += "\\n总计," + quotedItems.length + "项,";
             
             // 生成文件名
             var now = new Date();
@@ -1220,10 +1232,10 @@ function App() {
               {selectedMaterials.map(materialName => {
                 const material = materials.find(m => m.name === materialName);
                 return (
-                  <div key={materialName} style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '10px', 
+                  <div key={materialName} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
                     marginBottom: '8px',
                     padding: '8px',
                     backgroundColor: '#f8f9fa',
@@ -1244,10 +1256,10 @@ function App() {
                           value={unitValues[materialName] || ''}
                           onChange={(e) => handleUnitValueChange(materialName, e.target.value)}
                           placeholder="数值"
-                          style={{ 
-                            width: '80px', 
-                            padding: '4px 6px', 
-                            border: '1px solid #ddd', 
+                          style={{
+                            width: '80px',
+                            padding: '4px 6px',
+                            border: '1px solid #ddd',
                             borderRadius: '3px',
                             fontSize: '13px'
                           }}
