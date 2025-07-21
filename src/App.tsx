@@ -666,12 +666,30 @@ function App() {
           
           // 生成材质列表文本
           var selectedMaterialNames = JSON.parse('${JSON.stringify(selectedMaterials)}');
+          var materialsData = JSON.parse('${JSON.stringify(materials)}');
           var unitValue = '${unitValue}';
           var materialsList = [];
           
           for (var i = 0; i < selectedMaterialNames.length; i++) {
             var materialName = selectedMaterialNames[i];
-            var displayText = unitValue ? ("[" + unitValue + "] " + "材质:" + materialName) : ("材质:" + materialName);
+            
+            // 查找对应材质的单位信息
+            var materialUnit = '';
+            for (var j = 0; j < materialsData.length; j++) {
+              if (materialsData[j].name === materialName && materialsData[j].unit) {
+                materialUnit = materialsData[j].unit;
+                break;
+              }
+            }
+            
+            // 根据是否有单位值和单位信息生成显示文本
+            var displayText;
+            if (unitValue && materialUnit) {
+              displayText = unitValue + " " + materialUnit + " " + materialName;
+            } else {
+              displayText = materialName;
+            }
+            
             materialsList.push(displayText);
           }
           
@@ -1169,11 +1187,11 @@ function App() {
             value={unitValue}
             onChange={(e) => setUnitValue(e.target.value)}
             className="unit-input"
-            placeholder="例如：100个、50m²等"
+            placeholder="请输入数值，如：12、100等"
             style={{ width: '100%', padding: '6px 8px', border: '1px solid #ddd', borderRadius: '4px' }}
           />
           <small style={{ color: '#666', fontSize: '11px', display: 'block', marginTop: '4px' }}>
-            如果输入了单位值，将在材质前显示为：[单位值] 材质:材质名
+            输入数值后，将与材质的默认单位组合显示，如：12 cm 亚克力
           </small>
         </div>
 
@@ -1358,7 +1376,7 @@ function App() {
           <ol>
             <li>点击"调试测试"检查插件状态</li>
             <li>在 Illustrator 中选择要应用材质的对象</li>
-            <li>选择材质类型和单价</li>
+            <li>选择材质类型和输入数值</li>
             <li>点击"应用材质"按钮</li>
             <li>完成后点击"导出报价"生成 CSV 文件到桌面</li>
           </ol>
