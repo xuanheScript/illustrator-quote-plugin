@@ -1,151 +1,153 @@
-# Illustrator 标注插件 (CEP 12)
+# Illustrator Annotation Plugin (CEP 12)
 
 <div align="center">
 
-**一个专业的 Adobe Illustrator 材质标注插件，支持 CEP 12 和 Illustrator 2025+**
+**A professional Adobe Illustrator material annotation plugin with CEP 12 support for Illustrator 2025+**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![CEP Version](https://img.shields.io/badge/CEP-12.0-blue.svg)](https://github.com/Adobe-CEP/CEP-Resources)
 [![Illustrator](https://img.shields.io/badge/Illustrator-2025%2B-orange.svg)](https://www.adobe.com/products/illustrator.html)
 [![Node.js](https://img.shields.io/badge/Node.js-17.7.1%2B-green.svg)](https://nodejs.org/)
 
-[功能特性](#功能特性) • [插件预览](#插件预览) • [安装方法](#安装方法) • [使用教程](#使用教程) • [开发指南](#开发指南) • [故障排除](#故障排除)
+[Features](#-features) • [Plugin Preview](#-plugin-preview) • [Installation](#-installation-guide) • [Usage](#-usage-guide) • [Development](#-development-guide) • [Troubleshooting](#-troubleshooting)
+
+**[中文文档 (Chinese Documentation)](README-CN.md)**
 
 </div>
 
-## 🎯 功能特性
+## 🎯 Features
 
-### 🎨 材质管理系统
-- **📦 可管理材质库** - 添加、编辑、删除自定义材质，支持单位管理
-- **💾 本地存储** - 材质数据持久化保存
-- **🏷️ 多选支持** - 同时选择多个材质进行标注
-- **📋 预设材质** - 内置常用材质数据
+### 🎨 Material Management System
+- **📦 Manageable Material Library** - Add, edit, delete custom materials with unit management
+- **💾 Local Storage** - Persistent material data storage
+- **🏷️ Multi-selection Support** - Select multiple materials simultaneously for annotation
+- **📋 Preset Materials** - Built-in common material data
 
-### 🔧 标注功能
-- **📏 自动计算** - 基于对象边界框自动计算尺寸和面积
-- **🏷️ 智能标注** - 在对象旁自动添加材质信息和引导线
-- **📊 数据导出** - 一键导出包含宽高信息的 CSV 格式文件
-- **🎯 多对象支持** - 批量处理多个选中对象
-- **📐 单位管理** - 为每个材质设置默认单位，支持个性化数值输入
+### 🔧 Annotation Features
+- **📏 Auto-calculation** - Automatically calculate dimensions and area based on object bounding box
+- **🏷️ Smart Annotation** - Automatically add material information and leader lines next to objects
+- **📊 Data Export** - One-click export to CSV format including width and height information
+- **🎯 Multi-object Support** - Batch processing of multiple selected objects
+- **📐 Unit Management** - Set default units for each material with personalized value input
 
-### 🚀 技术特性
-- **CEP 12** - 支持最新的 Adobe Illustrator 2025+
-- **Chromium 99** - 现代 Web 标准支持
-- **React + TypeScript** - 现代前端技术栈
-- **ExtendScript** - 深度集成 Illustrator API
+### 🚀 Technical Features
+- **CEP 12** - Support for the latest Adobe Illustrator 2025+
+- **Chromium 99** - Modern web standards support
+- **React + TypeScript** - Modern frontend technology stack
+- **ExtendScript** - Deep integration with Illustrator API
 
-## 📦 预设材质
+## 📦 Preset Materials
 
-| 材质类型 | 颜色标识 | 描述 |
-|---------|---------|------|
-| 亚克力 | 🔴 | 透明度高，适合展示 |
-| PVC | 🟢 | 成本低，适合大面积使用 |
-| 宣绒布 | 🟠 | 质感好，适合高端应用 |
-| 不锈钢 | 🔴 | 高端质感，耐腐蚀 |
-| 木塑 | 🟣 | 自然质感，环保材质 |
+| Material Type | Color ID | Description |
+|---------------|----------|-------------|
+| Acrylic | 🔴 | High transparency, suitable for display |
+| PVC | 🟢 | Low cost, suitable for large area use |
+| Fleece | 🟠 | Good texture, suitable for premium applications |
+| Stainless Steel | 🔴 | Premium texture, corrosion resistant |
+| Wood-plastic | 🟣 | Natural texture, eco-friendly material |
 
-> 💡 **提示**：所有材质都可以通过材质管理功能进行自定义修改，可设置默认单位
+> 💡 **Tip**: All materials can be customized through the material management function, and default units can be set
 
-## 📸 插件预览
+## 📸 Plugin Preview
 
-### 主界面
-<img src="images/PluginView.png" alt="插件主界面" width="400"/>
+### Main Interface
+<img src="images/PluginView.png" alt="Plugin Main Interface" width="400"/>
 
-*主界面展示了材质选择、单位设置和应用功能*
+*Main interface showing material selection, unit settings and application functions*
 
-### 材质管理
-<img src="images/PluginDetailedView.png" alt="材质管理界面" width="400"/>
+### Material Management
+<img src="images/PluginDetailedView.png" alt="Material Management Interface" width="400"/>
 
-*材质管理界面支持添加、编辑和删除材质，设置默认单位和颜色*
+*Material management interface supports adding, editing and deleting materials, setting default units and colors*
 
-### 实际应用效果
-<img src="images/ExampleView.png" alt="应用效果示例" width="400"/>
+### Actual Application Effect
+<img src="images/ExampleView.png" alt="Application Effect Example" width="400"/>
 
-*在Illustrator中的实际应用效果，显示多材质标注和尺寸信息*
+*Actual application effect in Illustrator, showing multi-material annotation and dimension information*
 
-## 🛠️ 系统要求
+## 🛠️ System Requirements
 
-### 必需版本
-- **Adobe Illustrator 2025** (版本 29.0) 或更高版本
-- **CEP 12** 支持
-- **Node.js 17.7.1** 或更高版本（开发环境）
+### Required Versions
+- **Adobe Illustrator 2025** (Version 29.0) or higher
+- **CEP 12** support
+- **Node.js 17.7.1** or higher (for development environment)
 
-### 操作系统
-- **Windows 10/11** 或更高版本
-- **macOS 10.15** 或更高版本
+### Operating Systems
+- **Windows 10/11** or higher
+- **macOS 10.15** or higher
 
-## 🚀 安装方法
+## 🚀 Installation Guide
 
-### 版本选择指南
+### Version Selection Guide
 
-请根据您的 Illustrator 版本选择对应的插件版本：
+Please choose the corresponding plugin version based on your Illustrator version:
 
-| Illustrator 版本 | CEP 版本 | 插件版本 | 分支 | 推荐程度 |
-|-----------------|---------|---------|------|---------|
-| **2025+** | **CEP 12** | **v2.x.x** | **main** | ✅ **最新版本** |
-| 2021-2024 | CEP 10 | v1.5.x | cep10-support | 🟡 **稳定兼容** |
+| Illustrator Version | CEP Version | Plugin Version | Branch | Recommendation |
+|--------------------|-------------|----------------|--------|--------------|
+| **2025+** | **CEP 12** | **v2.x.x** | **main** | ✅ **Latest Version** |
+| 2021-2024 | CEP 10 | v1.5.x | cep10-support | 🟡 **Stable Compatible** |
 
-### 方法一：ZXP 文件安装 (推荐)
+### Method 1: ZXP File Installation (Recommended)
 
-#### 步骤 1: 安装工具
-下载以下任一安装工具：
+#### Step 1: Install Tool
+Download one of the following installation tools:
 
-- **[Anastasiy's Extension Manager](https://install.anastasiy.com/)** (推荐)
+- **[Anastasiy's Extension Manager](https://install.anastasiy.com/)** (Recommended)
 - **[ZXPInstaller](https://aescripts.com/learn/zxp-installer/)**
 
-#### 步骤 2: 安装插件
-1. 下载最新的 `illustrator-annotation-plugin-v2.0.0.zxp` 文件
-2. 打开安装工具
-3. 将 `.zxp` 文件拖拽到工具窗口
-4. 点击安装
+#### Step 2: Install Plugin
+1. Download the latest `illustrator-annotation-plugin-v2.0.0.zxp` file
+2. Open the installation tool
+3. Drag the `.zxp` file to the tool window
+4. Click install
 
-> 📄 详细安装说明请查看 [INSTALLATION.md](INSTALLATION.md)
+> 📄 For detailed installation instructions, please see [INSTALLATION.md](INSTALLATION.md)
 
-### 方法二：开发环境安装
+### Method 2: Development Environment Installation
 
 ```bash
-# 克隆项目
+# Clone project
 git clone https://github.com/yourusername/illustrator-annotation-plugin.git
 cd illustrator-annotation-plugin
 
-# 安装依赖
+# Install dependencies
 npm install
 
-# 构建并安装到开发环境
+# Build and install to development environment
 npm run install-debug
 ```
 
-### 手动安装
+### Manual Installation
 
-1. **构建插件**
+1. **Build Plugin**
    ```bash
-   # 安装依赖
+   # Install dependencies
    yarn install
    
-   # 构建插件
+   # Build plugin
    yarn build:cep
    ```
 
-2. **启用调试模式**
+2. **Enable Debug Mode**
    
-   **Windows (注册表):**
+   **Windows (Registry):**
    ```
    HKEY_CURRENT_USER\Software\Adobe\CSXS.12
-   创建字符串值：PlayerDebugMode = 1
+   Create string value: PlayerDebugMode = 1
    ```
    
-   **macOS (终端):**
+   **macOS (Terminal):**
    ```bash
    defaults write com.adobe.CSXS.12 PlayerDebugMode 1
    ```
 
-3. **复制插件文件**
+3. **Copy Plugin Files**
    
-   将 `dist` 文件夹复制到 CEP 扩展目录：
+   Copy the `dist` folder to the CEP extension directory:
    
    **Windows:**
    ```
-   C:\Users\[用户名]\AppData\Roaming\Adobe\CEP\extensions\illustrator-annotation-plugin
+   C:\Users\[Username]\AppData\Roaming\Adobe\CEP\extensions\illustrator-annotation-plugin
    ```
    
    **macOS:**
@@ -153,172 +155,172 @@ npm run install-debug
    ~/Library/Application Support/Adobe/CEP/extensions/illustrator-annotation-plugin
    ```
 
-## 📖 使用教程
+## 📖 Usage Guide
 
-### 1. 启动插件
+### 1. Launch Plugin
 
-1. 打开 Adobe Illustrator 2025+
-2. 菜单栏 → **窗口** → **扩展** → **Illustrator Quote**
-3. 插件面板将在右侧显示
+1. Open Adobe Illustrator 2025+
+2. Menu bar → **Window** → **Extensions** → **Illustrator Quote**
+3. Plugin panel will appear on the right side
 
-### 2. 材质管理
+### 2. Material Management
 
 <details>
-<summary>点击展开材质管理教程</summary>
+<summary>Click to expand material management tutorial</summary>
 
-#### 添加新材质
-1. 点击"**管理材质**"按钮
-2. 输入材质名称、默认单位和颜色
-3. 点击"**添加材质**"按钮
+#### Add New Material
+1. Click the "**Manage Materials**" button
+2. Enter material name, default unit, and color
+3. Click "**Add Material**" button
 
-#### 编辑材质
-1. 在材质列表中点击材质的"**编辑**"按钮
-2. 修改材质名称、单位或颜色
-3. 点击"**保存修改**"按钮
+#### Edit Material
+1. Click the "**Edit**" button for a material in the material list
+2. Modify material name, unit, or color
+3. Click "**Save Changes**" button
 
-#### 删除材质
-1. 在材质列表中点击材质的"**删除**"按钮
-2. 确认删除操作
+#### Delete Material
+1. Click the "**Delete**" button for a material in the material list
+2. Confirm the deletion operation
 
-> ⚠️ **注意**：系统至少保留一个材质，无法删除最后一个材质
+> ⚠️ **Note**: The system keeps at least one material; you cannot delete the last material
 
 </details>
 
-### 3. 应用材质标注
+### 3. Apply Material Annotation
 
 <details>
-<summary>点击展开标注操作教程</summary>
+<summary>Click to expand annotation operation tutorial</summary>
 
-#### 基本操作
-1. 在 Illustrator 中选择要标注的对象
-2. 在插件面板中选择一个或多个材质类型
-3. 为有单位的材质设置数值（可选）
-4. 点击"**应用材质**"按钮
-5. 选择标注位置
+#### Basic Operations
+1. Select the objects to annotate in Illustrator
+2. Select one or more material types in the plugin panel
+3. Set values for materials with units (optional)
+4. Click "**Apply Material**" button
+5. Select annotation position
 
-#### 多材质标注
-1. 选择多个材质（点击材质卡片选择/取消）
-2. 为每个材质单独设置数值
-3. 应用后将显示如："12 cm 亚克力 + 5 mm PVC"
+#### Multi-material Annotation
+1. Select multiple materials (click material cards to select/deselect)
+2. Set values for each material individually
+3. After application, it will display like: "12 cm Acrylic + 5 mm PVC"
 
-#### 导出标注数据
-1. 完成所有对象的材质应用
-2. 点击"**导出标注**"按钮
-3. CSV 文件将自动保存到桌面
+#### Export Annotation Data
+1. Complete material application for all objects
+2. Click "**Export Annotation**" button
+3. CSV file will be automatically saved to desktop
 
-**导出内容包括:**
-- 图层名称
-- 材质信息（含数值和单位）
-- 宽度 (mm)
-- 高度 (mm)
-- 面积 (m²)
+**Export content includes:**
+- Layer name
+- Material information (with values and units)
+- Width (mm)
+- Height (mm)
+- Area (m²)
 
 </details>
 
-### 4. 调试功能
+### 4. Debug Features
 
-- 勾选"显示调试信息"查看详细操作过程
-- 点击"**调试测试**"按钮检查插件状态
-- 查看调试信息确认系统工作正常
+- Check "Show debug information" to view detailed operation process
+- Click "**Debug Test**" button to check plugin status
+- View debug information to confirm system is working properly
 
-## 🔧 开发指南
+## 🔧 Development Guide
 
-### 技术栈
-- **前端**: React 19 + TypeScript + Vite
+### Technology Stack
+- **Frontend**: React 19 + TypeScript + Vite
 - **CEP**: CEP 12 + ExtendScript
-- **构建**: Yarn + ESLint
+- **Build**: Yarn + ESLint
 
-### 开发环境设置
+### Development Environment Setup
 
 ```bash
-# 克隆项目
+# Clone project
 git clone https://github.com/yourusername/illustrator-annotation-plugin.git
 cd illustrator-annotation-plugin
 
-# 安装依赖
+# Install dependencies
 yarn install
 
-# 开发模式
+# Development mode
 yarn dev
 
-# 构建 CEP 插件
+# Build CEP plugin
 yarn build:cep
 
-# 代码检查
+# Code linting
 yarn lint
 
-# 创建发布包
+# Create release package
 yarn release
 ```
 
-### 项目结构
+### Project Structure
 
 ```
 illustrator-annotation-plugin/
-├── src/                    # React 源代码
-│   ├── App.tsx            # 主应用组件
-│   ├── App.css            # 样式文件
-│   └── main.tsx           # 入口文件
-├── jsx/                   # ExtendScript 文件
-│   ├── applyMaterial.jsx  # 材质应用脚本
-│   └── exportQuote.jsx    # 报价导出脚本
-├── CSXS/                  # CEP 配置
-│   └── manifest.xml       # 插件清单
-├── lib/                   # CEP 库文件
-│   └── CSInterface.js     # CEP 接口
-├── scripts/               # 构建脚本
-│   ├── create-zxp.js      # ZXP 打包脚本
-│   └── install-debug.js   # 开发安装脚本
-├── dist/                  # 构建输出
-├── release/               # 发布文件
-└── docs/                  # 文档
+├── src/                    # React source code
+│   ├── App.tsx            # Main application component
+│   ├── App.css            # Style files
+│   └── main.tsx           # Entry file
+├── jsx/                   # ExtendScript files
+│   ├── applyMaterial.jsx  # Material application script
+│   └── exportQuote.jsx    # Quote export script
+├── CSXS/                  # CEP configuration
+│   └── manifest.xml       # Plugin manifest
+├── lib/                   # CEP library files
+│   └── CSInterface.js     # CEP interface
+├── scripts/               # Build scripts
+│   ├── create-zxp.js      # ZXP packaging script
+│   └── install-debug.js   # Development installation script
+├── dist/                  # Build output
+├── release/               # Release files
+└── docs/                  # Documentation
 ```
 
-### 发布流程
+### Release Process
 
-1. **构建插件**: `yarn build:cep`
-2. **创建ZXP**: `yarn create-zxp`
-3. **测试安装**: 使用生成的ZXP文件测试
-4. **发布**: 上传ZXP文件和安装说明
+1. **Build Plugin**: `yarn build:cep`
+2. **Create ZXP**: `yarn create-zxp`
+3. **Test Installation**: Test with generated ZXP file
+4. **Release**: Upload ZXP file and installation instructions
 
-## 🔍 故障排除
+## 🔍 Troubleshooting
 
-### 常见问题
+### Common Issues
 
 <details>
-<summary>插件显示白屏</summary>
+<summary>Plugin displays white screen</summary>
 
-**解决方案:**
-1. 确认使用 Illustrator 2025+ 版本
-2. 检查 CEP 12 调试模式是否启用
-3. 查看浏览器控制台错误信息
-4. 验证插件文件完整性
+**Solutions:**
+1. Confirm using Illustrator 2025+ version
+2. Check if CEP 12 debug mode is enabled
+3. Check browser console for error information
+4. Verify plugin file integrity
 
 </details>
 
 <details>
-<summary>插件菜单中不显示</summary>
+<summary>Plugin not showing in menu</summary>
 
-**解决方案:**
-1. 检查插件是否正确安装到 CEP 扩展目录
-2. 确认 manifest.xml 版本配置正确
-3. 重启 Illustrator 应用程序
-4. 检查 CEP 调试模式设置
+**Solutions:**
+1. Check if plugin is correctly installed to CEP extension directory
+2. Confirm manifest.xml version configuration is correct
+3. Restart Illustrator application
+4. Check CEP debug mode settings
 
 </details>
 
 <details>
-<summary>材质应用失败</summary>
+<summary>Material application fails</summary>
 
-**解决方案:**
-1. 确认已选择对象
-2. 检查对象是否支持边界框计算
-3. 查看调试信息中的错误信息
-4. 尝试使用"调试测试"功能
+**Solutions:**
+1. Confirm objects are selected
+2. Check if objects support bounding box calculation
+3. Check error information in debug messages
+4. Try using "Debug Test" function
 
 </details>
 
-### 调试模式设置
+### Debug Mode Setup
 
 **Windows:**
 ```cmd
@@ -330,29 +332,29 @@ reg add "HKEY_CURRENT_USER\Software\Adobe\CSXS.12" /v PlayerDebugMode /t REG_SZ 
 defaults write com.adobe.CSXS.12 PlayerDebugMode 1
 ```
 
-## 📄 许可证
+## 📄 License
 
-本项目基于 MIT 许可证开源 - 查看 [LICENSE](LICENSE) 文件了解详情。
+This project is open source under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🤝 致谢
+## 🤝 Acknowledgments
 
-- [Adobe CEP](https://github.com/Adobe-CEP/CEP-Resources) - CEP 开发资源
-- [React](https://reactjs.org/) - 前端框架
-- [TypeScript](https://www.typescriptlang.org/) - 类型安全
-- [Vite](https://vitejs.dev/) - 构建工具
-- [zxp-sign-cmd](https://github.com/codearoni/zxp-sign-cmd) - ZXP 签名工具
+- [Adobe CEP](https://github.com/Adobe-CEP/CEP-Resources) - CEP development resources
+- [React](https://reactjs.org/) - Frontend framework
+- [TypeScript](https://www.typescriptlang.org/) - Type safety
+- [Vite](https://vitejs.dev/) - Build tool
+- [zxp-sign-cmd](https://github.com/codearoni/zxp-sign-cmd) - ZXP signing tool
 
-## 📞 支持与反馈
+## 📞 Support & Feedback
 
-- 🐛 [报告 Bug](https://github.com/yourusername/illustrator-annotation-plugin/issues)
-- 💡 [功能建议](https://github.com/yourusername/illustrator-annotation-plugin/issues)
-- 📄 [详细安装指南](INSTALLATION.md)
+- 🐛 [Report Bug](https://github.com/xuanheScript/illustrator-quote-plugin/issues)
+- 💡 [Feature Request](https://github.com/xuanheScript/illustrator-quote-plugin/issues)
+- 📄 [Detailed Installation Guide](INSTALLATION.md)
 
 ---
 
 <div align="center">
 
-**如果这个项目对您有帮助，请给它一个 ⭐️**
+**If this project helps you, please give it a ⭐️**
 
 Made with ❤️ by Illustrator Annotation Plugin Team
 
