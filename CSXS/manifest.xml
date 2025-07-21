@@ -1,19 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ExtensionManifest
-    Version="12.0"
-    ExtensionBundleId="com.illustrator.quote.panel"
-    ExtensionBundleVersion="1.0.0"
-    ExtensionBundleName="Illustrator Quote Plugin"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="http://www.adobe.com/schemas/ExtensionManifest.xsd">
-
+<ExtensionManifest Version="12.0" ExtensionBundleId="com.illustrator.annotation.panel" ExtensionBundleVersion="2.0.0" ExtensionBundleName="Illustrator Annotation Panel">
+  <Author>
+    <![CDATA[Illustrator Annotation Plugin Team]]>
+  </Author>
+  <Contact>
+    <![CDATA[https://github.com/yourusername/illustrator-annotation-plugin]]>
+  </Contact>
+  <Legal>
+    <![CDATA[MIT License]]>
+  </Legal>
+  <Abstract>
+    <![CDATA[Adobe Illustrator材质标注插件 - CEP 12版本，兼容Illustrator 2025+]]>
+  </Abstract>
   <ExtensionList>
-    <Extension Id="com.illustrator.quote.panel" Version="1.0.0" />
+    <Extension Id="com.illustrator.annotation.panel" Version="2.0.0" />
   </ExtensionList>
-
   <ExecutionEnvironment>
     <HostList>
-      <!-- CEP 12 supports Illustrator 2025 and later -->
       <Host Name="ILST" Version="[29.0,99.9]" />
     </HostList>
     <LocaleList>
@@ -23,20 +26,16 @@
       <RequiredRuntime Name="CSXS" Version="12.0" />
     </RequiredRuntimeList>
   </ExecutionEnvironment>
-
   <DispatchInfoList>
-    <Extension Id="com.illustrator.quote.panel">
+    <Extension Id="com.illustrator.annotation.panel">
       <DispatchInfo>
         <Resources>
           <MainPath>./index.html</MainPath>
-          <!-- 如果要有入口脚本，可以保留一个 ScriptPath -->
-          <!-- <ScriptPath>./jsx/init.jsx</ScriptPath> -->
+          <ScriptPath>./jsx/applyMaterial.jsx</ScriptPath>
+          <ScriptPath>./jsx/exportQuote.jsx</ScriptPath>
           <CEFCommandLine>
-            <Parameter>--remote-debugging-port=8088</Parameter>
-            <Parameter>--allow-file-access-from-files</Parameter>
-            <Parameter>--allow-file-access</Parameter>
-            <Parameter>--disable-web-security</Parameter>
             <Parameter>--enable-nodejs</Parameter>
+            <Parameter>--mixed-context</Parameter>
           </CEFCommandLine>
         </Resources>
         <Lifecycle>
@@ -44,19 +43,19 @@
         </Lifecycle>
         <UI>
           <Type>Panel</Type>
-          <Menu>Illustrator Quote</Menu>
+          <Menu>Illustrator Annotation (CEP 12)</Menu>
           <Geometry>
             <Size>
-              <Height>400</Height>
-              <Width>320</Width>
+              <Height>600</Height>
+              <Width>350</Width>
             </Size>
             <MinSize>
-              <Height>300</Height>
-              <Width>280</Width>
+              <Height>400</Height>
+              <Width>300</Width>
             </MinSize>
             <MaxSize>
-              <Height>600</Height>
-              <Width>400</Width>
+              <Height>800</Height>
+              <Width>500</Width>
             </MaxSize>
           </Geometry>
           <Icons>
@@ -66,8 +65,9 @@
             <Icon Type="DarkRollOver">./icons/icon.png</Icon>
           </Icons>
         </UI>
+        <ExtensionData>
+        </ExtensionData>
       </DispatchInfo>
     </Extension>
   </DispatchInfoList>
-
 </ExtensionManifest>
