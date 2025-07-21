@@ -915,6 +915,8 @@ function App() {
               materials: selectedMaterialNames,
               unitValues: unitValues,
               area: totalArea,
+              width: totalWidthMm,
+              height: totalHeightMm,
               color: firstSelectedMaterial.color,
               groupName: group.name,
               textPosition: [${clickX}, ${clickY}],
@@ -1030,7 +1032,9 @@ function App() {
                       layerName: item.name || "未命名对象",
                       materials: data.materials || [data.material], // 兼容旧数据
                       unitValues: unitValues,
-                      area: data.area
+                      area: data.area,
+                      width: data.width || 0,
+                      height: data.height || 0
                     });
                   } catch (e) {}
                   break;
@@ -1046,7 +1050,7 @@ function App() {
             });
           } else {
             // 生成CSV内容
-            var csvContent = "图层,材质信息,面积(m²)\\n";
+            var csvContent = "图层,材质信息,宽度(mm),高度(mm),面积(m²)\\n";
             
             for (var i = 0; i < quotedItems.length; i++) {
               var item = quotedItems[i];
@@ -1078,10 +1082,12 @@ function App() {
               
               csvContent += item.layerName + "," + 
                            materialsText + "," + 
+                           item.width.toFixed(0) + "," +
+                           item.height.toFixed(0) + "," +
                            item.area.toFixed(3) + "\\n";
             }
             
-            csvContent += "\\n总计," + quotedItems.length + "项,";
+            csvContent += "\\n总计," + quotedItems.length + "项,,,";
             
             // 生成文件名
             var now = new Date();
