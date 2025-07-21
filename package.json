@@ -15,9 +15,10 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "package": "yarn build:cep && yarn create-zxp",
-    "create-zxp": "echo 'ZXP packaging requires Adobe Extension Builder or ZXPSignCmd'",
+    "create-zxp": "node scripts/simple-package.cjs",
     "install-debug": "yarn build:cep && yarn copy-to-extensions",
-    "copy-to-extensions": "echo 'Copy dist folder to CEP extensions directory'"
+    "copy-to-extensions": "node scripts/install-debug.cjs",
+    "release": "yarn build:cep && yarn create-zxp"
   },
   "dependencies": {
     "react": "^18.2.0",
@@ -34,7 +35,8 @@
     "globals": "^16.3.0",
     "typescript": "~5.6.2",
     "typescript-eslint": "^8.35.1",
-    "vite": "^6.0.1"
+    "vite": "^6.0.1",
+    "zxp-sign-cmd": "^2.0.0"
   },
   "keywords": [
     "adobe",
